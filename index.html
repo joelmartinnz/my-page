@@ -52,19 +52,63 @@
     #gameArea button {
       margin-right: 10px;
     }
+    input[type=number] {
+      padding: 10px 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.08);
+      color: #f8fbff;
+      font-size: 16px;
+      margin-right: 10px;
+      width: 120px;
+    }
+    .game-card {
+      background: rgba(10, 30, 40, 0.7);
+      border: 1px solid rgba(0, 255, 255, 0.18);
+      border-radius: 24px;
+      padding: 18px 22px;
+      margin-bottom: 24px;
+      box-shadow: 0 24px 60px rgba(0, 255, 255, 0.08);
+      backdrop-filter: blur(14px);
+    }
+    .game-card h2 {
+      margin-top: 0;
+      color: #b8ffff;
+    }
+    .game-card p {
+      color: #dcecff;
+      opacity: 0.95;
+    }
+    .page-title {
+      font-size: 3rem;
+      margin-bottom: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      background: linear-gradient(90deg, #7dfffc, #58a5ff, #e5ff7d);
+      -webkit-background-clip: text;
+      color: transparent;
+      animation: glow 3s ease-in-out infinite alternate;
+    }
+    @keyframes glow {
+      from { text-shadow: 0 0 8px rgba(170,255,255,0.8), 0 0 18px rgba(79,201,255,0.5); }
+      to { text-shadow: 0 0 20px rgba(175,255,255,1), 0 0 36px rgba(30,126,255,0.7); }
+    }
   </style>
 </head>
 <body>
-  <h1>hello </h1>
-  <p>this is my cool website </p>
+  <h1 class="page-title">Neon Arcade</h1>
+  <p>Pick a game below and jump right into the action.</p>
   
-  <h2> Guess the Number Game</h2>
-  <p>I'm thinking of a number between 1 and 100. Can you guess it?</p>
-  <input type="number" id="guess" min="1" max="100">
-  <button onclick="checkGuess()">Guess</button>
-  <p id="result"></p>
+  <div class="game-card">
+    <h2>Guess the Number</h2>
+    <p>I'm thinking of a number between 1 and 100. Can you guess it?</p>
+    <input type="number" id="guess" min="1" max="100">
+    <button onclick="checkGuess()">Guess</button>
+    <p id="result"></p>
+  </div>
   
-  <h2>Yes or No Guessing Game</h2>
+  <div class="game-card">
+    <h2>Yes or No Guessing Game</h2>
   <p>Think of an animal (cat, dog, bird, or fish), and I'll try to guess it by asking yes or no questions!</p>
   <button id="startGame" onclick="startYesNoGame()">Start Game</button>
   <div id="gameArea" style="display: none;">
@@ -73,17 +117,22 @@
     <button onclick="answerNo()">No</button>
     <p id="gameResult"></p>
   </div>
+  </div>
   
-  <h2>Flappy Bird Game</h2>
+  <div class="game-card">
+    <h2>Flappy Bird</h2>
   <p>Click or press space to make the bird flap and avoid the pipes!</p>
   <canvas id="flappyCanvas" width="400" height="400" style="border: 1px solid black;"></canvas>
   <p id="flappyScore">Score: 0</p>
+  </div>
   
-  <h2>Stickman Fighting Game</h2>
+  <div class="game-card">
+    <h2>Stickman Fighting</h2>
   <p>Use A/D to move, W to punch, S to kick. Click Start to begin the fight.</p>
   <button id="startFightBtn" onclick="startFight()">Start Fight</button>
   <canvas id="stickmanCanvas" width="600" height="300" style="border: 1px solid black; display: block; margin-top: 10px;"></canvas>
   <p id="fightStatus">Press Start to fight.</p>
+  </div>
   
   <script>
     let randomNumber = Math.floor(Math.random() * 100) + 1;
@@ -258,6 +307,7 @@
     let enemy = { x: 460, y: 220, health: 100, action: 'idle', timer: 0, cooldown: 30 };
     let fightMessage = 'Press Start to fight.';
     const fightKeys = { left: false, right: false };
+    let sparks = [];
     
     function clamp(value, min, max) {
       return Math.max(min, Math.min(max, value));
@@ -289,6 +339,18 @@
       }
     }
     
+    function spawnSpark(x, y) {
+      sparks.push({ x, y, radius: 4, alpha: 1 });
+    }
+    
+    function updateSparks() {
+      sparks = sparks.filter(spark => spark.alpha > 0);
+      sparks.forEach(spark => {
+        spark.radius += 0.8;
+        spark.alpha -= 0.03;
+      });
+    }
+    
     function updateFight() {
       if (!fightRunning) return;
       if (fightKeys.left) player.x -= 4;
@@ -299,6 +361,7 @@
         player.timer -= 1;
         if (player.timer <= 0) {
           applyAttack(player, enemy, player.action, 'Player');
+          spawnSpark((player.x + enemy.x) / 2, player.y - 18);
           player.action = 'idle';
         }
       }
@@ -328,6 +391,8 @@
         enemy.timer -= 1;
         if (enemy.timer <= 0) {
           applyAttack(enemy, player, enemy.action, 'Enemy');
+          spawnSpark((player.x + enemy.x) / 2, player.y - 18);
+          spawnSpark((player.x + enemy.x) / 2, player.y - 18);
           enemy.action = 'idle';
           enemy.cooldown = 30;
         }
@@ -337,6 +402,7 @@
         fightRunning = false;
         fightMessage = player.health <= 0 ? 'Enemy wins! Click Start to fight again.' : 'Player wins! Click Start to fight again.';
       }
+      updateSparks();
       
       document.getElementById('fightStatus').textContent = fightMessage;
     }
@@ -401,6 +467,14 @@
       fightCtx.fillText('Enemy HP', 420, 22);
       drawStickman(fightCtx, player, '#f8fbff', true);
       drawStickman(fightCtx, enemy, '#57a7ff', false);
+      fightCtx.globalCompositeOperation = 'lighter';
+      sparks.forEach(spark => {
+        fightCtx.fillStyle = `rgba(170, 255, 255, ${spark.alpha})`;
+        fightCtx.beginPath();
+        fightCtx.arc(spark.x, spark.y, spark.radius, 0, Math.PI * 2);
+        fightCtx.fill();
+      });
+      fightCtx.globalCompositeOperation = 'source-over';
       fightCtx.fillStyle = '#aaffff';
       fightCtx.font = '18px Inter, Arial, sans-serif';
       fightCtx.fillText(fightMessage, 20, 205);
