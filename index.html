@@ -203,15 +203,19 @@
     const fightCanvas = document.getElementById('stickmanCanvas');
     const fightCtx = fightCanvas.getContext('2d');
     let fightRunning = false;
-    let player = { x: 140, y: 220, health: 100, action: 'idle', actionTimer: 0 };
-    let enemy = { x: 460, y: 220, health: 100, action: 'idle', actionTimer: 0, cooldown: 30 };
+    let player = { x: 140, y: 220, health: 100, action: 'idle', timer: 0 };
+    let enemy = { x: 460, y: 220, health: 100, action: 'idle', timer: 0, cooldown: 30 };
     let fightMessage = 'Press Start to fight.';
-    const fightKeys = { a: false, d: false };
+    const fightKeys = { left: false, right: false };
+    
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
     
     function startFight() {
       fightRunning = true;
-      player = { x: 140, y: 220, health: 100, action: 'idle', actionTimer: 0 };
-      enemy = { x: 460, y: 220, health: 100, action: 'idle', actionTimer: 0, cooldown: 30 };
+      player = { x: 140, y: 220, health: 100, action: 'idle', timer: 0 };
+      enemy = { x: 460, y: 220, health: 100, action: 'idle', timer: 0, cooldown: 30 };
       fightMessage = 'Fight!';
       document.getElementById('fightStatus').textContent = fightMessage;
       fightLoop();
@@ -220,30 +224,30 @@
     function setPlayerAction(action) {
       if (!fightRunning || player.action !== 'idle') return;
       player.action = action;
-      player.actionTimer = action === 'kick' ? 22 : 16;
+      player.timer = action === 'kick' ? 22 : 16;
     }
     
-    function applyHit(attacker, defender, action) {
+    function applyAttack(attacker, defender, action, side) {
       const distance = Math.abs(attacker.x - defender.x);
-      if (distance <= 120) {
+      if (distance <= 130) {
         const damage = action === 'kick' ? 18 : 12;
         defender.health = Math.max(0, defender.health - damage);
-        fightMessage = `${attacker === player ? 'Player' : 'Enemy'} ${action}s and deals ${damage}!`;
+        fightMessage = `${side} ${action}s and deals ${damage}!`;
       } else {
-        fightMessage = `${attacker === player ? 'Player' : 'Enemy'} ${action}s and misses.`;
+        fightMessage = `${side} ${action}s and misses.`;
       }
     }
     
     function updateFight() {
       if (!fightRunning) return;
-      if (fightKeys.a) player.x -= 4;
-      if (fightKeys.d) player.x += 4;
-      player.x = Math.max(80, Math.min(320, player.x));
+      if (fightKeys.left) player.x -= 4;
+      if (fightKeys.right) player.x += 4;
+      player.x = clamp(player.x, 70, 360);
       
       if (player.action !== 'idle') {
-        player.actionTimer -= 1;
-        if (player.actionTimer <= 0) {
-          applyHit(player, enemy, player.action);
+        player.timer -= 1;
+        if (player.timer <= 0) {
+          applyAttack(player, enemy, player.action, 'Player');
           player.action = 'idle';
         }
       }
@@ -252,27 +256,27 @@
         enemy.cooldown -= 1;
       } else if (enemy.action === 'idle') {
         const distance = Math.abs(player.x - enemy.x);
-        if (distance > 150) {
+        if (distance > 140) {
           enemy.action = 'move';
-          enemy.actionTimer = 40;
+          enemy.timer = 40;
         } else {
           enemy.action = Math.random() < 0.6 ? 'punch' : 'kick';
-          enemy.actionTimer = enemy.action === 'kick' ? 22 : 16;
+          enemy.timer = enemy.action === 'kick' ? 22 : 16;
         }
       }
       
       if (enemy.action === 'move') {
         enemy.x += player.x < enemy.x ? -3 : 3;
-        enemy.x = Math.max(340, Math.min(520, enemy.x));
-        enemy.actionTimer -= 1;
-        if (enemy.actionTimer <= 0) {
+        enemy.x = clamp(enemy.x, 260, 520);
+        enemy.timer -= 1;
+        if (enemy.timer <= 0) {
           enemy.action = 'idle';
           enemy.cooldown = 15;
         }
       } else if (enemy.action !== 'idle') {
-        enemy.actionTimer -= 1;
-        if (enemy.actionTimer <= 0) {
-          applyHit(enemy, player, enemy.action);
+        enemy.timer -= 1;
+        if (enemy.timer <= 0) {
+          applyAttack(enemy, player, enemy.action, 'Enemy');
           enemy.action = 'idle';
           enemy.cooldown = 30;
         }
@@ -286,10 +290,10 @@
       document.getElementById('fightStatus').textContent = fightMessage;
     }
     
-    function drawStickman(ctx, actor, color) {
-      ctx.fillStyle = color;
+    function drawStickman(ctx, actor, color, isPlayer) {
       ctx.strokeStyle = color;
       ctx.lineWidth = 5;
+      ctx.fillStyle = color;
       ctx.beginPath();
       ctx.arc(actor.x, actor.y - 45, 14, 0, Math.PI * 2);
       ctx.fill();
@@ -302,16 +306,15 @@
       ctx.moveTo(actor.x, actor.y - 20);
       ctx.lineTo(actor.x - 22, actor.y - 10);
       ctx.moveTo(actor.x, actor.y - 20);
-      if (actor.action === 'punch') {
-        ctx.lineTo(actor.x + (actor === player ? 34 : -34), actor.y - 20);
-      } else {
-        ctx.lineTo(actor.x + (actor === player ? 22 : -22), actor.y - 10);
-      }
+      const armBaseX = actor.x + (isPlayer ? 22 : -22);
+      const punchX = actor.x + (isPlayer ? 34 : -34);
+      ctx.lineTo(actor.action === 'punch' ? punchX : armBaseX, actor.y - 20);
       ctx.stroke();
       if (actor.action === 'kick') {
         ctx.beginPath();
+        const kickX = actor.x + (isPlayer ? 28 : -28);
         ctx.moveTo(actor.x, actor.y + 16);
-        ctx.lineTo(actor.x + (actor === player ? 28 : -28), actor.y + 35);
+        ctx.lineTo(kickX, actor.y + 36);
         ctx.stroke();
       }
       ctx.fillStyle = '#000';
@@ -336,8 +339,10 @@
       fightCtx.font = '16px Arial';
       fightCtx.fillText('Player HP', 20, 22);
       fightCtx.fillText('Enemy HP', 420, 22);
-      drawStickman(fightCtx, player, '#fafafa');
-      drawStickman(fightCtx, enemy, '#4af');
+      fightCtx.fillStyle = '#66f';
+      fightCtx.fillRect(0, 240, fightCanvas.width, 10);
+      drawStickman(fightCtx, player, '#fff', true);
+      drawStickman(fightCtx, enemy, '#4af', false);
       if (!fightRunning) {
         fightCtx.fillStyle = '#ff0';
         fightCtx.font = '18px Arial';
@@ -353,16 +358,16 @@
       }
     }
     
-    document.addEventListener('keydown', (e) => {
-      if (e.key.toLowerCase() === 'a') fightKeys.a = true;
-      if (e.key.toLowerCase() === 'd') fightKeys.d = true;
+    window.addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() === 'a') fightKeys.left = true;
+      if (e.key.toLowerCase() === 'd') fightKeys.right = true;
       if (fightRunning && e.key.toLowerCase() === 'w') setPlayerAction('punch');
       if (fightRunning && e.key.toLowerCase() === 's') setPlayerAction('kick');
     });
     
-    document.addEventListener('keyup', (e) => {
-      if (e.key.toLowerCase() === 'a') fightKeys.a = false;
-      if (e.key.toLowerCase() === 'd') fightKeys.d = false;
+    window.addEventListener('keyup', (e) => {
+      if (e.key.toLowerCase() === 'a') fightKeys.left = false;
+      if (e.key.toLowerCase() === 'd') fightKeys.right = false;
     });
     
     drawFight();
