@@ -11,6 +11,7 @@
       color: #f8fbff;
       perspective: 1400px;
       perspective-origin: center top;
+      transform-style: preserve-3d;
     }
     h1, h2 {
       text-transform: uppercase;
@@ -75,20 +76,24 @@
       width: 120px;
     }
     .game-card {
-      background: rgba(10, 30, 40, 0.75);
+      background: rgba(10, 30, 40, 0.78);
       border: 1px solid rgba(0, 255, 255, 0.22);
       border-radius: 24px;
       padding: 18px 22px;
       margin-bottom: 24px;
-      box-shadow: 0 24px 80px rgba(0, 255, 255, 0.12);
+      box-shadow: 0 24px 80px rgba(0, 255, 255, 0.16);
       backdrop-filter: blur(18px);
       transform-style: preserve-3d;
+      transform: perspective(1400px) translateZ(18px) rotateX(1deg);
       transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
     }
     .game-card:hover {
-      transform: translateY(-12px) translateZ(30px) rotateX(2deg);
-      box-shadow: 0 40px 100px rgba(0, 255, 255, 0.22);
-      border-color: rgba(0, 255, 255, 0.35);
+      transform: perspective(1400px) translateY(-16px) translateZ(58px) rotateX(5deg) rotateY(-1deg);
+      box-shadow: 0 45px 120px rgba(0, 255, 255, 0.35);
+      border-color: rgba(0, 255, 255, 0.55);
+    }
+    .page-title {
+      transform: translateZ(40px);
     }
     .game-card h2 {
       margin-top: 0;
@@ -149,6 +154,7 @@
     <h2>Stickman Fighting</h2>
   <p>Use A/D to move, W to punch, S to kick. Click Start to begin the fight.</p>
   <button id="startFightBtn" onclick="startFight()">Start Fight</button>
+  <button id="startBossBtn" onclick="startBossFight()">Start Boss Fight</button>
   <canvas id="stickmanCanvas" width="600" height="300" style="border: 1px solid black; display: block; margin-top: 10px;"></canvas>
   <p id="fightStatus">Press Start to fight.</p>
   </div>
@@ -322,8 +328,9 @@
     const fightCanvas = document.getElementById('stickmanCanvas');
     const fightCtx = fightCanvas.getContext('2d');
     let fightRunning = false;
+    let bossMode = false;
     let player = { x: 140, y: 220, health: 100, action: 'idle', timer: 0 };
-    let enemy = { x: 460, y: 220, health: 100, action: 'idle', timer: 0, cooldown: 30 };
+    let enemy = { x: 460, y: 220, health: 100, action: 'idle', timer: 0, cooldown: 30, isBoss: false };
     let fightMessage = 'Press Start to fight.';
     const fightKeys = { left: false, right: false };
     let sparks = [];
@@ -333,10 +340,21 @@
     }
     
     function startFight() {
+      bossMode = false;
       fightRunning = true;
       player = { x: 140, y: 220, health: 100, action: 'idle', timer: 0 };
-      enemy = { x: 460, y: 220, health: 100, action: 'idle', timer: 0, cooldown: 30 };
+      enemy = { x: 460, y: 220, health: 100, action: 'idle', timer: 0, cooldown: 30, isBoss: false };
       fightMessage = 'Fight!';
+      document.getElementById('fightStatus').textContent = fightMessage;
+      fightLoop();
+    }
+    
+    function startBossFight() {
+      bossMode = true;
+      fightRunning = true;
+      player = { x: 140, y: 220, health: 120, action: 'idle', timer: 0 };
+      enemy = { x: 470, y: 220, health: 220, action: 'idle', timer: 0, cooldown: 20, isBoss: true };
+      fightMessage = 'Boss fight started!';
       document.getElementById('fightStatus').textContent = fightMessage;
       fightLoop();
     }
@@ -350,7 +368,9 @@
     function applyAttack(attacker, defender, action, side) {
       const distance = Math.abs(attacker.x - defender.x);
       if (distance <= 130) {
-        const damage = action === 'kick' ? 18 : 12;
+        let damage = action === 'kick' ? 18 : 12;
+        if (attacker.isBoss) damage += 8;
+        if (defender.isBoss && side === 'Player') damage += 6;
         defender.health = Math.max(0, defender.health - damage);
         fightMessage = `${side} ${action}s and deals ${damage}!`;
       } else {
@@ -389,22 +409,26 @@
         enemy.cooldown -= 1;
       } else if (enemy.action === 'idle') {
         const distance = Math.abs(player.x - enemy.x);
-        if (distance > 140) {
+        if (distance > (enemy.isBoss ? 180 : 140)) {
           enemy.action = 'move';
-          enemy.timer = 40;
+          enemy.timer = enemy.isBoss ? 32 : 40;
         } else {
-          enemy.action = Math.random() < 0.6 ? 'punch' : 'kick';
-          enemy.timer = enemy.action === 'kick' ? 22 : 16;
+          if (enemy.isBoss && Math.random() < 0.3) {
+            enemy.action = 'kick';
+          } else {
+            enemy.action = Math.random() < 0.6 ? 'punch' : 'kick';
+          }
+          enemy.timer = enemy.action === 'kick' ? (enemy.isBoss ? 24 : 22) : 18;
         }
       }
       
       if (enemy.action === 'move') {
         enemy.x += player.x < enemy.x ? -3 : 3;
-        enemy.x = clamp(enemy.x, 260, 520);
+        enemy.x = clamp(enemy.x, enemy.isBoss ? 240 : 260, 520);
         enemy.timer -= 1;
         if (enemy.timer <= 0) {
           enemy.action = 'idle';
-          enemy.cooldown = 15;
+          enemy.cooldown = enemy.isBoss ? 10 : 15;
         }
       } else if (enemy.action !== 'idle') {
         enemy.timer -= 1;
@@ -476,14 +500,14 @@
       fightCtx.strokeStyle = '#8ef';
       fightCtx.lineWidth = 2;
       fightCtx.strokeRect(20, 30, 160, 14);
-      fightCtx.fillStyle = '#f55';
+      fightCtx.fillStyle = enemy.isBoss ? '#ff8800' : '#f55';
       fightCtx.fillRect(420, 30, enemy.health * 1.6, 14);
-      fightCtx.strokeStyle = '#f9a';
+      fightCtx.strokeStyle = enemy.isBoss ? '#ffc587' : '#f9a';
       fightCtx.strokeRect(420, 30, 160, 14);
       fightCtx.fillStyle = '#cde';
       fightCtx.font = '16px Inter, Arial, sans-serif';
       fightCtx.fillText('Player HP', 20, 22);
-      fightCtx.fillText('Enemy HP', 420, 22);
+      fightCtx.fillText(enemy.isBoss ? 'Boss HP' : 'Enemy HP', 420, 22);
       drawStickman(fightCtx, player, '#f8fbff', true);
       drawStickman(fightCtx, enemy, '#57a7ff', false);
       fightCtx.globalCompositeOperation = 'lighter';
