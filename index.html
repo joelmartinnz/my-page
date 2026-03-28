@@ -491,127 +491,131 @@
       ctx.save();
       const x = actor.x;
       const y = actor.y;
-      const armorBase = actor.isBoss ? '#4a2d35' : '#1f5199';
-      const armorPanel = actor.isBoss ? '#7a4453' : '#3f7dc3';
-      const trim = actor.isBoss ? '#dbad52' : '#ffe47e';
-      const visor = actor.isBoss ? '#161116' : '#0e2036';
-      const metal = '#b5b9be';
+      const armorBase = actor.isBoss ? '#4a1f2f' : '#1d4a8c';
+      const armorPanel = actor.isBoss ? '#7d3f55' : '#3f7cc2';
+      const trim = actor.isBoss ? '#d8b15a' : '#ffdd7f';
+      const visor = actor.isBoss ? '#120f16' : '#0e2036';
+      const metal = '#adb4bb';
+      const shoulderGlow = actor.isBoss ? 'rgba(255, 120, 80, 0.4)' : 'rgba(120, 220, 255, 0.35)';
 
-      // Helmet dome
-      ctx.fillStyle = armorBase;
-      ctx.strokeStyle = trim;
-      ctx.lineWidth = 6;
-      ctx.beginPath();
-      ctx.arc(x, y - 50, 20, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-
-      // Visor plate
-      ctx.fillStyle = visor;
-      ctx.fillRect(x - 12, y - 58, 24, 12);
-      ctx.strokeStyle = trim;
       ctx.lineWidth = 3;
-      ctx.strokeRect(x - 12, y - 58, 24, 12);
-
-      // Eye slits
-      ctx.fillStyle = '#000';
-      ctx.fillRect(x - 9, y - 56, 6, 5);
-      ctx.fillRect(x + 3, y - 56, 6, 5);
-
-      // Helmet crest
-      ctx.fillStyle = trim;
-      ctx.beginPath();
-      ctx.moveTo(x - 8, y - 60);
-      ctx.lineTo(x, y - 70);
-      ctx.lineTo(x + 8, y - 60);
-      ctx.closePath();
-      ctx.fill();
-
-      // Chest block
-      ctx.fillStyle = armorBase;
       ctx.strokeStyle = trim;
-      ctx.lineWidth = 4;
-      ctx.fillRect(x - 26, y - 34, 52, 54);
-      ctx.strokeRect(x - 26, y - 34, 52, 54);
+
+      // Legs
+      ctx.fillStyle = armorBase;
+      ctx.fillRect(x - 24, y + 24, 22, 44);
+      ctx.fillRect(x + 2, y + 24, 22, 44);
+      ctx.strokeRect(x - 24, y + 24, 22, 44);
+      ctx.strokeRect(x + 2, y + 24, 22, 44);
+
+      // Boots
+      ctx.fillStyle = '#11171d';
+      ctx.fillRect(x - 28, y + 62, 30, 14);
+      ctx.fillRect(x + 0, y + 62, 30, 14);
+      ctx.strokeRect(x - 28, y + 62, 30, 14);
+      ctx.strokeRect(x + 0, y + 62, 30, 14);
+
+      // Torso
+      ctx.fillStyle = armorBase;
+      ctx.fillRect(x - 34, y - 24, 68, 64);
+      ctx.strokeRect(x - 34, y - 24, 68, 64);
+      ctx.fillStyle = armorPanel;
+      ctx.fillRect(x - 34, y - 24, 68, 18);
+      ctx.fillRect(x - 18, y - 10, 14, 24);
+      ctx.fillRect(x + 4, y - 10, 14, 24);
+      ctx.strokeRect(x - 34, y - 24, 68, 64);
 
       // Aquila badge
       ctx.fillStyle = trim;
       ctx.beginPath();
-      ctx.moveTo(x - 8, y - 18);
-      ctx.lineTo(x, y - 8);
-      ctx.lineTo(x + 8, y - 18);
-      ctx.lineTo(x + 4, y - 12);
-      ctx.lineTo(x + 2, y - 12);
-      ctx.lineTo(x, y - 10);
-      ctx.lineTo(x - 2, y - 12);
-      ctx.lineTo(x - 4, y - 12);
+      ctx.moveTo(x - 8, y + 4);
+      ctx.lineTo(x, y + 18);
+      ctx.lineTo(x + 8, y + 4);
+      ctx.lineTo(x + 4, y + 10);
+      ctx.lineTo(x + 2, y + 10);
+      ctx.lineTo(x, y + 12);
+      ctx.lineTo(x - 2, y + 10);
+      ctx.lineTo(x - 4, y + 10);
       ctx.closePath();
       ctx.fill();
 
       // Pauldrons
       ctx.fillStyle = armorPanel;
       ctx.beginPath();
-      ctx.ellipse(x - 38, y - 30, 18, 22, 0, 0, Math.PI * 2);
+      ctx.ellipse(x - 46, y - 18, 26, 24, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
       ctx.beginPath();
-      ctx.ellipse(x + 38, y - 30, 18, 22, 0, 0, Math.PI * 2);
+      ctx.ellipse(x + 46, y - 18, 26, 24, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
 
-      // Upper arms
-      ctx.fillStyle = armorPanel;
-      ctx.fillRect(x - 44, y - 28, 16, 28);
-      ctx.fillRect(x + 28, y - 28, 16, 28);
-      ctx.strokeRect(x - 44, y - 28, 16, 28);
-      ctx.strokeRect(x + 28, y - 28, 16, 28);
+      // Shoulder glow
+      ctx.fillStyle = shoulderGlow;
+      ctx.beginPath();
+      ctx.arc(x - 46, y - 18, 28, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(x + 46, y - 18, 28, 0, Math.PI * 2);
+      ctx.fill();
 
-      // Forearms
-      const leftHandX = actor.action === 'punch' ? x - 58 : x - 44;
-      const rightHandX = actor.action === 'punch' ? x + 58 : x + 44;
-      ctx.fillRect(leftHandX - 6, y - 18, 16, 18);
-      ctx.fillRect(rightHandX - 6, y - 18, 16, 18);
-      ctx.strokeRect(leftHandX - 6, y - 18, 16, 18);
-      ctx.strokeRect(rightHandX - 6, y - 18, 16, 18);
+      // Arms
+      ctx.fillStyle = armorBase;
+      ctx.fillRect(x - 56, y - 12, 20, 44);
+      ctx.fillRect(x + 36, y - 12, 20, 44);
+      ctx.strokeRect(x - 56, y - 12, 20, 44);
+      ctx.strokeRect(x + 36, y - 12, 20, 44);
+
+      // Forearm armor
+      ctx.fillStyle = armorPanel;
+      ctx.fillRect(x - 60, y + 22, 26, 16);
+      ctx.fillRect(x + 34, y + 22, 26, 16);
+      ctx.strokeRect(x - 60, y + 22, 26, 16);
+      ctx.strokeRect(x + 34, y + 22, 26, 16);
+
+      // Gauntlets
+      const leftHandX = x - 62;
+      const rightHandX = x + 42;
+      ctx.fillStyle = '#222a33';
+      ctx.fillRect(leftHandX, y + 10, 20, 18);
+      ctx.fillRect(rightHandX, y + 10, 20, 18);
+      ctx.strokeRect(leftHandX, y + 10, 20, 18);
+      ctx.strokeRect(rightHandX, y + 10, 20, 18);
 
       // Weapon
       if (!actor.isBoss) {
         ctx.fillStyle = metal;
-        ctx.fillRect(rightHandX + 10, y - 14, 32, 10);
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 2;
-        for (let i = 0; i < 5; i++) {
-          ctx.fillRect(rightHandX + 12 + i * 5, y - 14, 3, 10);
-        }
-        ctx.fillStyle = '#4d5560';
-        ctx.fillRect(rightHandX + 26, y - 18, 6, 18);
+        ctx.fillRect(rightHandX + 18, y + 4, 30, 10);
+        ctx.fillRect(rightHandX + 28, y - 12, 10, 28);
+        ctx.fillStyle = '#d9d9d9';
+        ctx.fillRect(rightHandX + 30, y - 10, 6, 24);
       } else {
         ctx.fillStyle = trim;
-        ctx.fillRect(rightHandX + 8, y - 10, 24, 14);
-        ctx.strokeStyle = '#87633d';
-        ctx.lineWidth = 3;
-        ctx.strokeRect(rightHandX + 8, y - 10, 24, 14);
+        ctx.fillRect(rightHandX + 14, y - 6, 34, 16);
+        ctx.strokeRect(rightHandX + 14, y - 6, 34, 16);
+        ctx.fillRect(rightHandX + 30, y - 26, 10, 24);
+        ctx.strokeRect(rightHandX + 30, y - 26, 10, 24);
       }
 
-      // Waist belt
-      ctx.fillStyle = trim;
-      ctx.fillRect(x - 20, y + 18, 40, 8);
-      ctx.strokeStyle = '#000';
-      ctx.strokeRect(x - 20, y + 18, 40, 8);
-
-      // Legs
+      // Helmet
       ctx.fillStyle = armorBase;
-      ctx.fillRect(x - 26, y + 20, 18, 36);
-      ctx.fillRect(x + 8, y + 20, 18, 36);
-      ctx.strokeRect(x - 26, y + 20, 18, 36);
-      ctx.strokeRect(x + 8, y + 20, 18, 36);
+      ctx.beginPath();
+      ctx.ellipse(x, y - 58, 26, 26, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = visor;
+      ctx.fillRect(x - 16, y - 68, 32, 18);
+      ctx.strokeStyle = trim;
+      ctx.strokeRect(x - 16, y - 68, 32, 18);
 
-      // Boots
-      ctx.fillStyle = '#10151d';
-      ctx.fillRect(x - 26, y + 56, 18, 12);
-      ctx.fillRect(x + 8, y + 56, 18, 12);
-      ctx.strokeRect(x - 26, y + 56, 18, 12);
-      ctx.strokeRect(x + 8, y + 56, 18, 12);
+      // Visor glow
+      ctx.fillStyle = actor.isBoss ? '#ff6d4d' : '#8bf4ff';
+      ctx.fillRect(x - 8, y - 64, 16, 8);
+
+      // Helmet crest
+      ctx.fillStyle = trim;
+      ctx.fillRect(x - 4, y - 88, 8, 24);
+      ctx.fillRect(x - 10, y - 84, 20, 8);
 
       ctx.restore();
     }
