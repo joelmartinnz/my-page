@@ -43,13 +43,15 @@
       display: block;
       max-width: 100%;
       margin-top: 12px;
-      background: #010a12;
+      background: transparent;
     }
     #stickmanCanvas {
-      border: 2px solid rgba(0, 255, 255, 0.35);
-      box-shadow: 0 0 40px rgba(0, 255, 255, 0.25);
+      border: 3px solid rgba(0, 255, 255, 0.55);
+      border-radius: 18px;
+      box-shadow: 0 0 60px rgba(0, 255, 255, 0.35);
       transform: rotateX(12deg) rotateY(-4deg) translateZ(10px);
       transform-origin: center;
+      background: rgba(0, 8, 16, 0.35);
     }
     #flappyCanvas {
       border: 2px solid rgba(134, 255, 255, 0.35);
@@ -155,7 +157,7 @@
   <p>Use A/D to move, W to punch, S to kick. Click Start to begin the fight.</p>
   <button id="startFightBtn" onclick="startFight()">Start Fight</button>
   <button id="startBossBtn" onclick="startBossFight()">Start Boss Fight</button>
-  <canvas id="stickmanCanvas" width="600" height="300" style="border: 1px solid black; display: block; margin-top: 10px;"></canvas>
+  <canvas id="stickmanCanvas" width="600" height="300" style="display: block; margin-top: 10px;"></canvas>
   <p id="fightStatus">Press Start to fight.</p>
   </div>
   
