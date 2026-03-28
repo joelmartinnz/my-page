@@ -210,7 +210,7 @@
     function startFight() {
       fightRunning = true;
       player = { x: 120, y: 220, health: 100, action: null, actionTimer: 0, moveLeft: false, moveRight: false };
-      enemy = { x: 480, y: 220, health: 100, action: null, actionTimer: 0, cooldown: 30 };
+      enemy = { x: 440, y: 220, health: 100, action: null, actionTimer: 0, cooldown: 30 };
       fightMessage = 'Fight!';
       document.getElementById('fightStatus').textContent = fightMessage;
       fightLoop();
@@ -226,7 +226,7 @@
       if (!fightRunning) return;
       if (player.moveLeft) player.x -= 4;
       if (player.moveRight) player.x += 4;
-      player.x = Math.max(50, Math.min(250, player.x));
+      player.x = Math.max(50, Math.min(340, player.x));
       
       if (enemy.cooldown > 0) {
         enemy.cooldown -= 1;
@@ -244,7 +244,7 @@
       if (enemy.action === 'move') {
         enemy.x += player.x < enemy.x ? -2 : 2;
       }
-      enemy.x = Math.max(350, Math.min(530, enemy.x));
+      enemy.x = Math.max(320, Math.min(530, enemy.x));
       
       if (player.action) {
         player.actionTimer -= 1;
