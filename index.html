@@ -389,8 +389,8 @@
       bossMode = true;
       fightRunning = true;
       player = { x: 140, y: 220, health: 120, maxHealth: 120, action: 'idle', timer: 0, name: 'Roboute Guilliman' };
-      enemy = { x: 470, y: 220, health: 220, maxHealth: 220, action: 'idle', timer: 0, cooldown: 20, isBoss: true, name: 'Chaos Overlord' };
-      fightMessage = 'Chaos Overlord erupts with ruinous might!';
+      enemy = { x: 470, y: 220, health: 250, maxHealth: 250, action: 'idle', timer: 0, cooldown: 15, isBoss: true, name: 'Gutrot Spume' };
+      fightMessage = 'Gutrot Spume erupts with ruinous plague!';
       document.getElementById('fightStatus').textContent = fightMessage;
       fightLoop();
     }
@@ -406,8 +406,8 @@
       const attackerName = attacker.name || (side === 'Player' ? 'Guilliman' : 'Enemy');
       if (distance <= 130) {
         let damage = action === 'kick' ? 18 : 12;
-        if (attacker.isBoss) damage += 8;
-        if (defender.isBoss && side === 'Player') damage += 6;
+        if (attacker.isBoss) damage += 10;
+        if (defender.isBoss && side === 'Player') damage += 8;
         defender.health = Math.max(0, defender.health - damage);
         fightMessage = `${attackerName} ${action}s and deals ${damage}!`;
       } else {
@@ -450,7 +450,7 @@
           enemy.action = 'move';
           enemy.timer = enemy.isBoss ? 32 : 40;
         } else {
-          if (enemy.isBoss && Math.random() < 0.3) {
+          if (enemy.isBoss && Math.random() < 0.5) {
             enemy.action = 'kick';
           } else {
             enemy.action = Math.random() < 0.6 ? 'punch' : 'kick';
@@ -474,7 +474,7 @@
           spawnSpark((player.x + enemy.x) / 2, player.y - 18);
           spawnSpark((player.x + enemy.x) / 2, player.y - 18);
           enemy.action = 'idle';
-          enemy.cooldown = 30;
+          enemy.cooldown = enemy.isBoss ? 25 : 30;
         }
       }
       
