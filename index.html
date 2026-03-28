@@ -2,8 +2,59 @@
 <html>
 <head>
   <title>my cool website</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: Inter, system-ui, sans-serif;
+      background: radial-gradient(circle at top, #00ffe0 0%, #01705c 45%, #001f24 100%);
+      color: #f8fbff;
+    }
+    h1, h2 {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      text-shadow: 0 0 20px rgba(0, 255, 200, 0.3);
+    }
+    p {
+      line-height: 1.6;
+    }
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 18px;
+      background: linear-gradient(135deg, #0ff, #06f);
+      color: #001c2a;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 14px 30px rgba(0, 255, 255, 0.18);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 40px rgba(0, 255, 255, 0.28);
+      filter: brightness(1.05);
+    }
+    canvas {
+      display: block;
+      max-width: 100%;
+      margin-top: 12px;
+      background: #010a12;
+    }
+    #stickmanCanvas {
+      border: 2px solid rgba(0, 255, 255, 0.35);
+      box-shadow: 0 0 40px rgba(0, 255, 255, 0.18);
+    }
+    #fightStatus {
+      margin-top: 10px;
+      font-weight: 800;
+      color: #f3f9ff;
+    }
+    #gameArea button {
+      margin-right: 10px;
+    }
+  </style>
 </head>
-<body style="background: rgb(0, 255, 174);">
+<body>
   <h1>hello </h1>
   <p>this is my cool website </p>
   
@@ -323,30 +374,40 @@
     }
     
     function drawFight() {
-      fightCtx.fillStyle = '#111';
+      const arena = fightCtx.createLinearGradient(0, 0, 0, fightCanvas.height);
+      arena.addColorStop(0, '#050f18');
+      arena.addColorStop(0.5, '#081f2c');
+      arena.addColorStop(1, '#02060c');
+      fightCtx.fillStyle = arena;
       fightCtx.fillRect(0, 0, fightCanvas.width, fightCanvas.height);
-      fightCtx.fillStyle = '#223';
-      fightCtx.fillRect(0, 240, fightCanvas.width, 60);
-      fightCtx.fillStyle = '#0f0';
-      fightCtx.fillRect(20, 30, player.health * 1.6, 12);
-      fightCtx.strokeStyle = '#fff';
-      fightCtx.strokeRect(20, 30, 160, 12);
+      fightCtx.fillStyle = 'rgba(0, 255, 255, 0.08)';
+      for (let x = 0; x < fightCanvas.width; x += 32) {
+        fightCtx.fillRect(x, 0, 2, fightCanvas.height);
+      }
+      fightCtx.fillStyle = '#0e2f41';
+      fightCtx.fillRect(0, 248, fightCanvas.width, 52);
+      fightCtx.fillStyle = '#0f8';
+      fightCtx.fillRect(20, 30, player.health * 1.6, 14);
+      fightCtx.strokeStyle = '#8ef';
+      fightCtx.lineWidth = 2;
+      fightCtx.strokeRect(20, 30, 160, 14);
       fightCtx.fillStyle = '#f55';
-      fightCtx.fillRect(420, 30, enemy.health * 1.6, 12);
-      fightCtx.strokeStyle = '#fff';
-      fightCtx.strokeRect(420, 30, 160, 12);
-      fightCtx.fillStyle = '#fff';
-      fightCtx.font = '16px Arial';
+      fightCtx.fillRect(420, 30, enemy.health * 1.6, 14);
+      fightCtx.strokeStyle = '#f9a';
+      fightCtx.strokeRect(420, 30, 160, 14);
+      fightCtx.fillStyle = '#cde';
+      fightCtx.font = '16px Inter, Arial, sans-serif';
       fightCtx.fillText('Player HP', 20, 22);
       fightCtx.fillText('Enemy HP', 420, 22);
-      fightCtx.fillStyle = '#66f';
-      fightCtx.fillRect(0, 240, fightCanvas.width, 10);
-      drawStickman(fightCtx, player, '#fff', true);
-      drawStickman(fightCtx, enemy, '#4af', false);
+      drawStickman(fightCtx, player, '#f8fbff', true);
+      drawStickman(fightCtx, enemy, '#57a7ff', false);
+      fightCtx.fillStyle = '#aaffff';
+      fightCtx.font = '18px Inter, Arial, sans-serif';
+      fightCtx.fillText(fightMessage, 20, 205);
       if (!fightRunning) {
-        fightCtx.fillStyle = '#ff0';
-        fightCtx.font = '18px Arial';
-        fightCtx.fillText('Press Start to fight', 220, 150);
+        fightCtx.fillStyle = '#ffdc33';
+        fightCtx.font = '20px Inter, Arial, sans-serif';
+        fightCtx.fillText('Press Start to fight', 190, 150);
       }
     }
     
@@ -359,15 +420,17 @@
     }
     
     window.addEventListener('keydown', (e) => {
-      if (e.key.toLowerCase() === 'a') fightKeys.left = true;
-      if (e.key.toLowerCase() === 'd') fightKeys.right = true;
-      if (fightRunning && e.key.toLowerCase() === 'w') setPlayerAction('punch');
-      if (fightRunning && e.key.toLowerCase() === 's') setPlayerAction('kick');
+      const key = e.key.toLowerCase();
+      if (key === 'a' || e.code === 'ArrowLeft') fightKeys.left = true;
+      if (key === 'd' || e.code === 'ArrowRight') fightKeys.right = true;
+      if (fightRunning && (key === 'w' || e.code === 'ArrowUp')) setPlayerAction('punch');
+      if (fightRunning && (key === 's' || e.code === 'ArrowDown')) setPlayerAction('kick');
     });
     
     window.addEventListener('keyup', (e) => {
-      if (e.key.toLowerCase() === 'a') fightKeys.left = false;
-      if (e.key.toLowerCase() === 'd') fightKeys.right = false;
+      const key = e.key.toLowerCase();
+      if (key === 'a' || e.code === 'ArrowLeft') fightKeys.left = false;
+      if (key === 'd' || e.code === 'ArrowRight') fightKeys.right = false;
     });
     
     drawFight();
