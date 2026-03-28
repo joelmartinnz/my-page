@@ -25,8 +25,14 @@
   
   <h2>Flappy Bird Game</h2>
   <p>Click or press space to make the bird flap and avoid the pipes!</p>
-  <canvas id="flappyCanvas" width="400" height="600" style="border: 1px solid black;"></canvas>
+  <canvas id="flappyCanvas" width="400" height="400" style="border: 1px solid black;"></canvas>
   <p id="flappyScore">Score: 0</p>
+  
+  <h2>Stickman Fighting Game</h2>
+  <p>Use A/D to move, W to punch, S to kick. Click Start to begin the fight.</p>
+  <button id="startFight" onclick="startFight()">Start Fight</button>
+  <canvas id="stickmanCanvas" width="600" height="300" style="border: 1px solid black; display: block; margin-top: 10px;"></canvas>
+  <p id="fightStatus">Press Start to fight.</p>
   
   <script>
     let randomNumber = Math.floor(Math.random() * 100) + 1;
@@ -72,7 +78,7 @@
       const next = questions[currentQuestion].yes;
       if (typeof next === 'string') {
         document.getElementById('gameResult').textContent = `I guess it's a ${next}!`;
-        document.getElementById('gameArea').style.display = 'block';
+        document.getElementById('gameArea').style.display = 'none';
         document.getElementById('startGame').style.display = 'block';
       } else {
         currentQuestion = next;
@@ -146,7 +152,8 @@
     }
     
     function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'skyblue';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
       drawBird();
       drawPipes();
     }
@@ -192,6 +199,167 @@
       }
     });
     
+    // Stickman Fighting Game
+    const fightCanvas = document.getElementById('stickmanCanvas');
+    const fightCtx = fightCanvas.getContext('2d');
+    let fightRunning = false;
+    let player = { x: 120, y: 220, health: 100, action: null, actionTimer: 0, moveLeft: false, moveRight: false };
+    let enemy = { x: 480, y: 220, health: 100, action: null, actionTimer: 0, cooldown: 0 };
+    let fightMessage = 'Press Start to fight.';
+    
+    function startFight() {
+      fightRunning = true;
+      player = { x: 120, y: 220, health: 100, action: null, actionTimer: 0, moveLeft: false, moveRight: false };
+      enemy = { x: 480, y: 220, health: 100, action: null, actionTimer: 0, cooldown: 30 };
+      fightMessage = 'Fight!';
+      document.getElementById('fightStatus').textContent = fightMessage;
+      fightLoop();
+    }
+    
+    function setPlayerAction(action) {
+      if (!fightRunning || player.action) return;
+      player.action = action;
+      player.actionTimer = action === 'kick' ? 20 : 15;
+    }
+    
+    function updateFight() {
+      if (!fightRunning) return;
+      if (player.moveLeft) player.x -= 4;
+      if (player.moveRight) player.x += 4;
+      player.x = Math.max(50, Math.min(250, player.x));
+      
+      if (enemy.cooldown > 0) {
+        enemy.cooldown -= 1;
+      } else if (!enemy.action) {
+        const distance = player.x - enemy.x;
+        if (Math.abs(distance) > 120) {
+          enemy.action = 'move';
+          enemy.actionTimer = 30;
+        } else {
+          enemy.action = Math.random() < 0.5 ? 'punch' : 'kick';
+          enemy.actionTimer = enemy.action === 'kick' ? 20 : 15;
+        }
+      }
+      
+      if (enemy.action === 'move') {
+        enemy.x += player.x < enemy.x ? -2 : 2;
+      }
+      enemy.x = Math.max(350, Math.min(530, enemy.x));
+      
+      if (player.action) {
+        player.actionTimer -= 1;
+        if (player.actionTimer === 0) {
+          if (Math.abs(player.x - enemy.x) < 100) {
+            const damage = player.action === 'kick' ? 15 : 10;
+            enemy.health = Math.max(0, enemy.health - damage);
+            fightMessage = `Player ${player.action}ed! Enemy took ${damage} damage.`;
+          }
+          player.action = null;
+        }
+      }
+      
+      if (enemy.action && enemy.action !== 'move') {
+        enemy.actionTimer -= 1;
+        if (enemy.actionTimer === 0) {
+          if (Math.abs(player.x - enemy.x) < 100) {
+            const damage = enemy.action === 'kick' ? 15 : 10;
+            player.health = Math.max(0, player.health - damage);
+            fightMessage = `Enemy ${enemy.action}ed! Player took ${damage} damage.`;
+          }
+          enemy.action = null;
+          enemy.cooldown = 40;
+        }
+      } else if (enemy.action === 'move' && enemy.actionTimer > 0) {
+        enemy.actionTimer -= 1;
+        if (enemy.actionTimer === 0) {
+          enemy.action = null;
+          enemy.cooldown = 20;
+        }
+      }
+      
+      if (player.health <= 0 || enemy.health <= 0) {
+        fightRunning = false;
+        fightMessage = player.health <= 0 ? 'Enemy wins! Click Start to fight again.' : 'Player wins! Click Start to fight again.';
+      }
+      document.getElementById('fightStatus').textContent = fightMessage;
+    }
+    
+    function drawStickman(ctx, actor, color) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(actor.x, actor.y - 40, 12, 0, Math.PI * 2);
+      ctx.moveTo(actor.x, actor.y - 28);
+      ctx.lineTo(actor.x, actor.y + 20);
+      ctx.moveTo(actor.x, actor.y + 20);
+      ctx.lineTo(actor.x - 12, actor.y + 40);
+      ctx.moveTo(actor.x, actor.y + 20);
+      ctx.lineTo(actor.x + 12, actor.y + 40);
+      ctx.moveTo(actor.x, actor.y);
+      ctx.lineTo(actor.x - 18, actor.y - 10);
+      ctx.moveTo(actor.x, actor.y);
+      ctx.lineTo(actor.x + 18, actor.y - 10);
+      ctx.stroke();
+      if (actor.action === 'punch') {
+        ctx.beginPath();
+        ctx.strokeStyle = '#ff6600';
+        ctx.lineWidth = 6;
+        ctx.moveTo(actor.x + (actor === player ? 18 : -18), actor.y - 10);
+        ctx.lineTo(actor.x + (actor === player ? 30 : -30), actor.y - 20);
+        ctx.stroke();
+      } else if (actor.action === 'kick') {
+        ctx.beginPath();
+        ctx.strokeStyle = '#ff6600';
+        ctx.lineWidth = 6;
+        ctx.moveTo(actor.x + (actor === player ? 12 : -12), actor.y + 40);
+        ctx.lineTo(actor.x + (actor === player ? 26 : -26), actor.y + 50);
+        ctx.stroke();
+      }
+    }
+    
+    function drawFight() {
+      fightCtx.fillStyle = '#222';
+      fightCtx.fillRect(0, 0, fightCanvas.width, fightCanvas.height);
+      fightCtx.fillStyle = '#444';
+      fightCtx.fillRect(0, 260, fightCanvas.width, 40);
+      drawStickman(fightCtx, player, '#ffffff');
+      drawStickman(fightCtx, enemy, '#00ccff');
+      fightCtx.fillStyle = '#ff3333';
+      fightCtx.fillRect(20, 20, player.health * 1.8, 16);
+      fightCtx.strokeStyle = '#fff';
+      fightCtx.strokeRect(20, 20, 180, 16);
+      fightCtx.fillStyle = '#ff3333';
+      fightCtx.fillRect(380, 20, enemy.health * 1.8, 16);
+      fightCtx.strokeStyle = '#fff';
+      fightCtx.strokeRect(380, 20, 180, 16);
+      fightCtx.fillStyle = '#fff';
+      fightCtx.font = '14px Arial';
+      fightCtx.fillText(`Player: ${player.health} HP`, 20, 15);
+      fightCtx.fillText(`Enemy: ${enemy.health} HP`, 380, 15);
+    }
+    
+    function fightLoop() {
+      updateFight();
+      drawFight();
+      if (fightRunning) {
+        requestAnimationFrame(fightLoop);
+      }
+    }
+    
+    document.addEventListener('keydown', (e) => {
+      if (!fightRunning) return;
+      if (e.key.toLowerCase() === 'a') player.moveLeft = true;
+      if (e.key.toLowerCase() === 'd') player.moveRight = true;
+      if (e.key.toLowerCase() === 'w') setPlayerAction('punch');
+      if (e.key.toLowerCase() === 's') setPlayerAction('kick');
+    });
+    
+    document.addEventListener('keyup', (e) => {
+      if (e.key.toLowerCase() === 'a') player.moveLeft = false;
+      if (e.key.toLowerCase() === 'd') player.moveRight = false;
+    });
+    
+    drawFight();
     gameLoop();
   </script>
 </body>
