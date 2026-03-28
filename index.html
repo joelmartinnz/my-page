@@ -172,12 +172,12 @@
   </div>
   
   <div class="game-card">
-    <h2>Stickman Fighting</h2>
-  <p>Use A/D to move, W to punch, S to kick. Click Start to begin the fight.</p>
-  <button id="startFightBtn" onclick="startFight()">Start Fight</button>
+    <h2>Warhammer Arena</h2>
+  <p>Use A/D to move, W to strike, S to charge. Click Start to deploy your Space Marine.</p>
+  <button id="startFightBtn" onclick="startFight()">Deploy Marine</button>
   <button id="startBossBtn" onclick="startBossFight()">Start Warhammer Boss</button>
   <canvas id="stickmanCanvas" width="600" height="300" style="display: block; margin-top: 10px;"></canvas>
-  <p id="fightStatus">Press Start to fight.</p>
+  <p id="fightStatus">Press Start to deploy your Space Marine.</p>
   </div>
   
   <script>
@@ -345,14 +345,14 @@
       }
     });
     
-    // Stickman Fighting Game
+    // Warhammer Battle Game
     const fightCanvas = document.getElementById('stickmanCanvas');
     const fightCtx = fightCanvas.getContext('2d');
     let fightRunning = false;
     let bossMode = false;
     let player = { x: 140, y: 220, health: 100, action: 'idle', timer: 0 };
     let enemy = { x: 460, y: 220, health: 100, action: 'idle', timer: 0, cooldown: 30, isBoss: false };
-    let fightMessage = 'Press Start to fight.';
+    let fightMessage = 'Press Start to deploy your Space Marine.';
     const fightKeys = { left: false, right: false };
     let sparks = [];
     
@@ -365,7 +365,7 @@
       fightRunning = true;
       player = { x: 140, y: 220, health: 100, action: 'idle', timer: 0 };
       enemy = { x: 460, y: 220, health: 100, action: 'idle', timer: 0, cooldown: 30, isBoss: false };
-      fightMessage = 'Fight!';
+      fightMessage = 'Space Marine enters the fray!';
       document.getElementById('fightStatus').textContent = fightMessage;
       fightLoop();
     }
