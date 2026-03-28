@@ -472,15 +472,56 @@
     }
     
     function drawStickman(ctx, actor, color, isPlayer) {
+      ctx.save();
+      const headX = actor.x;
+      const headY = actor.y - 45;
+      const headGlow = ctx.createRadialGradient(headX, headY, 2, headX, headY, 16);
+      headGlow.addColorStop(0, '#ffffff');
+      headGlow.addColorStop(0.3, color);
+      headGlow.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = headGlow;
+      ctx.beginPath();
+      ctx.arc(headX, headY, 14, 0, Math.PI * 2);
+      ctx.fill();
       ctx.strokeStyle = color;
       ctx.lineWidth = 5;
-      ctx.fillStyle = color;
       ctx.beginPath();
-      ctx.arc(actor.x, actor.y - 45, 14, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.arc(headX, headY, 14, 0, Math.PI * 2);
+      ctx.stroke();
+
+      if (isPlayer) {
+        ctx.fillStyle = 'rgba(100, 255, 255, 0.35)';
+        ctx.beginPath();
+        ctx.ellipse(headX, headY - 4, 10, 6, 0, 0, Math.PI);
+        ctx.fill();
+      } else if (actor.isBoss) {
+        ctx.strokeStyle = '#ffdd88';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(headX - 10, headY - 18);
+        ctx.lineTo(headX - 20, headY - 34);
+        ctx.moveTo(headX + 10, headY - 18);
+        ctx.lineTo(headX + 20, headY - 34);
+        ctx.stroke();
+      }
+
+      if (isPlayer) {
+        ctx.fillStyle = 'rgba(0, 255, 255, 0.12)';
+        ctx.beginPath();
+        ctx.moveTo(actor.x - 24, actor.y + 10);
+        ctx.lineTo(actor.x - 38, actor.y + 20);
+        ctx.lineTo(actor.x - 32, actor.y + 40);
+        ctx.lineTo(actor.x - 16, actor.y + 20);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 5;
       ctx.beginPath();
       ctx.moveTo(actor.x, actor.y - 30);
       ctx.lineTo(actor.x, actor.y + 18);
+      ctx.moveTo(actor.x, actor.y + 18);
       ctx.lineTo(actor.x - 12, actor.y + 38);
       ctx.moveTo(actor.x, actor.y + 18);
       ctx.lineTo(actor.x + 12, actor.y + 38);
@@ -491,16 +532,42 @@
       const punchX = actor.x + (isPlayer ? 34 : -34);
       ctx.lineTo(actor.action === 'punch' ? punchX : armBaseX, actor.y - 20);
       ctx.stroke();
+
+      if (actor.action === 'punch') {
+        ctx.strokeStyle = isPlayer ? 'rgba(100,255,255,0.8)' : 'rgba(255,200,80,0.85)';
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.moveTo(armBaseX, actor.y - 20);
+        ctx.lineTo(punchX, actor.y - 20);
+        ctx.stroke();
+      }
+
       if (actor.action === 'kick') {
         ctx.beginPath();
         const kickX = actor.x + (isPlayer ? 28 : -28);
+        ctx.strokeStyle = isPlayer ? 'rgba(100,255,255,0.8)' : 'rgba(255,200,80,0.85)';
+        ctx.lineWidth = 8;
         ctx.moveTo(actor.x, actor.y + 16);
         ctx.lineTo(kickX, actor.y + 36);
         ctx.stroke();
       }
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(actor.x, actor.y - 8);
+      ctx.lineTo(actor.x - 18, actor.y - 18);
+      ctx.stroke();
+      ctx.strokeStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(actor.x, actor.y - 8);
+      ctx.lineTo(actor.x + 18, actor.y - 18);
+      ctx.stroke();
+
       ctx.fillStyle = '#000';
       ctx.fillRect(actor.x - 6, actor.y - 52, 3, 3);
       ctx.fillRect(actor.x + 3, actor.y - 52, 3, 3);
+      ctx.restore();
     }
     
     function drawFight() {
@@ -537,8 +604,8 @@
       fightCtx.font = '16px Inter, Arial, sans-serif';
       fightCtx.fillText('Player HP', 20, 22);
       fightCtx.fillText(enemy.isBoss ? 'Boss HP' : 'Enemy HP', 420, 22);
-      drawStickman(fightCtx, player, '#f8fbff', true);
-      drawStickman(fightCtx, enemy, '#57a7ff', false);
+      drawStickman(fightCtx, player, '#a8f8ff', true);
+      drawStickman(fightCtx, enemy, enemy.isBoss ? '#ffb64a' : '#57a7ff', false);
       fightCtx.globalCompositeOperation = 'lighter';
       sparks.forEach(spark => {
         fightCtx.fillStyle = `rgba(170, 255, 255, ${spark.alpha})`;
