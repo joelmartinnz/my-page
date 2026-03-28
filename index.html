@@ -491,14 +491,14 @@
       ctx.save();
       const x = actor.x;
       const y = actor.y;
-      const armorFront = actor.isBoss ? '#3d1d2a' : '#1d4d94';
-      const armorSide = actor.isBoss ? '#5b2d47' : '#3f7dc6';
-      const armorPanel = actor.isBoss ? '#7f4b64' : '#5d8fd0';
-      const trim = actor.isBoss ? '#d78f4e' : '#ffeb80';
-      const visor = actor.isBoss ? '#190e12' : '#0f233a';
+      const armorFront = actor.isBoss ? '#2d5a2d' : '#1d4d94';
+      const armorSide = actor.isBoss ? '#4a6b3a' : '#3f7dc6';
+      const armorPanel = actor.isBoss ? '#6b8f4a' : '#5d8fd0';
+      const trim = actor.isBoss ? '#a0b050' : '#ffeb80';
+      const visor = actor.isBoss ? '#1a2a1a' : '#0f233a';
       const metal = '#b3bac3';
-      const accent = actor.isBoss ? '#ff4d4d' : '#8deafc';
-      const glow = actor.isBoss ? 'rgba(255, 100, 100, 0.28)' : 'rgba(110, 230, 255, 0.24)';
+      const accent = actor.isBoss ? '#80ff80' : '#8deafc';
+      const glow = actor.isBoss ? 'rgba(100, 255, 100, 0.28)' : 'rgba(110, 230, 255, 0.24)';
 
       ctx.lineWidth = 2;
       ctx.strokeStyle = 'rgba(0,0,0,0.24)';
@@ -570,8 +570,28 @@
       ctx.fillRect(x - 12, y - 6, 6, 8);
       ctx.fillRect(x + 6, y - 6, 6, 8);
 
+      // Pustules for Gutrot
+      if (actor.isBoss) {
+        ctx.fillStyle = '#6b8f4a';
+        ctx.beginPath();
+        ctx.arc(x - 20, y - 10, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(x + 20, y + 10, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(x, y - 20, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(x - 10, y + 20, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(x + 15, y - 5, 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
       // Core crystal
-      ctx.fillStyle = actor.isBoss ? '#ff7260' : '#7ef4ff';
+      ctx.fillStyle = actor.isBoss ? '#80ff80' : '#7ef4ff';
       ctx.beginPath();
       ctx.moveTo(x, y); 
       ctx.lineTo(x - 8, y + 14);
@@ -620,7 +640,7 @@
       ctx.fill();
 
       if (actor.isBoss) {
-        ctx.fillStyle = '#bc3b4e';
+        ctx.fillStyle = '#4a8f4a';
         ctx.beginPath();
         ctx.moveTo(x - 60, y - 20);
         ctx.lineTo(x - 78, y - 46);
@@ -633,7 +653,7 @@
         ctx.lineTo(x + 66, y - 34);
         ctx.closePath();
         ctx.fill();
-        ctx.fillStyle = '#ff9f8d';
+        ctx.fillStyle = '#a0ffa0';
         ctx.beginPath();
         ctx.moveTo(x - 46, y - 44);
         ctx.lineTo(x - 38, y - 62);
@@ -731,11 +751,11 @@
       ctx.fillStyle = visor;
       ctx.fillRect(x - 16, y - 68, 32, 18);
       ctx.strokeRect(x - 16, y - 68, 32, 18);
-      ctx.fillStyle = actor.isBoss ? '#ff7a56' : '#8bf4ff';
+      ctx.fillStyle = actor.isBoss ? '#80ff80' : '#8bf4ff';
       ctx.fillRect(x - 8, y - 64, 16, 8);
 
       if (actor.isBoss) {
-        ctx.fillStyle = '#d37a4f';
+        ctx.fillStyle = '#80b050';
         ctx.beginPath();
         ctx.moveTo(x - 10, y - 86);
         ctx.lineTo(x, y - 98);
