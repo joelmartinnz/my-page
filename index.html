@@ -378,8 +378,8 @@
     function startFight() {
       bossMode = false;
       fightRunning = true;
-      player = { x: 140, y: 220, health: 120, action: 'idle', timer: 0, name: 'Roboute Guilliman' };
-      enemy = { x: 460, y: 220, health: 120, action: 'idle', timer: 0, cooldown: 30, isBoss: false, name: 'Chaos Champion' };
+      player = { x: 140, y: 220, health: 120, maxHealth: 120, action: 'idle', timer: 0, name: 'Roboute Guilliman' };
+      enemy = { x: 460, y: 220, health: 120, maxHealth: 120, action: 'idle', timer: 0, cooldown: 30, isBoss: false, name: 'Chaos Champion' };
       fightMessage = 'Lord Guilliman descends with legendary fury!';
       document.getElementById('fightStatus').textContent = fightMessage;
       fightLoop();
@@ -388,8 +388,8 @@
     function startBossFight() {
       bossMode = true;
       fightRunning = true;
-      player = { x: 140, y: 220, health: 120, action: 'idle', timer: 0, name: 'Roboute Guilliman' };
-      enemy = { x: 470, y: 220, health: 220, action: 'idle', timer: 0, cooldown: 20, isBoss: true, name: 'Chaos Overlord' };
+      player = { x: 140, y: 220, health: 120, maxHealth: 120, action: 'idle', timer: 0, name: 'Roboute Guilliman' };
+      enemy = { x: 470, y: 220, health: 220, maxHealth: 220, action: 'idle', timer: 0, cooldown: 20, isBoss: true, name: 'Chaos Overlord' };
       fightMessage = 'Chaos Overlord erupts with ruinous might!';
       document.getElementById('fightStatus').textContent = fightMessage;
       fightLoop();
@@ -814,12 +814,12 @@
         fightCtx.stroke();
       }
       fightCtx.fillStyle = '#0f8';
-      fightCtx.fillRect(20, 30, player.health * 1.6, 14);
+      fightCtx.fillRect(20, 30, (player.health / player.maxHealth) * 160, 14);
       fightCtx.strokeStyle = '#8ef';
       fightCtx.lineWidth = 2;
       fightCtx.strokeRect(20, 30, 160, 14);
       fightCtx.fillStyle = enemy.isBoss ? '#ffb14d' : '#f55';
-      fightCtx.fillRect(420, 30, enemy.health * 1.6, 14);
+      fightCtx.fillRect(420, 30, (enemy.health / enemy.maxHealth) * 160, 14);
       fightCtx.strokeStyle = enemy.isBoss ? '#ffc587' : '#f9a';
       fightCtx.strokeRect(420, 30, 160, 14);
       fightCtx.fillStyle = '#cde';
