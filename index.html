@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>my cool website</title>
+  <title>awesome games arcade</title>
   <style>
     body {
       margin: 0;
@@ -43,7 +43,7 @@
       border: none;
       border-radius: 999px;
       padding: 10px 18px;
-      background: linear-gradient(135deg, #0ff, #06f);
+      background: linear-gradient(135deg, rgb(255, 0, 0), rgb(0, 98, 255));
       color: #001c2a;
       font-weight: 700;
       cursor: pointer;
@@ -386,101 +386,81 @@
       robloxLoop();
     }
 
+function project3D(x, y, z) {
+      return {
+        x: x + z * 0.45,
+        y: y - z * 0.28
+      };
+    }
+
+    function drawCube(ctx, x, y, w, h, d, fillColor) {
+      const a = project3D(x, y, 0);
+      const b = project3D(x + w, y, 0);
+      const c = project3D(x + w, y + h, 0);
+      const d0 = project3D(x, y + h, 0);
+      const e = project3D(x, y, d);
+      const f = project3D(x + w, y, d);
+      const g = project3D(x + w, y + h, d);
+      const h0 = project3D(x, y + h, d);
+
+      ctx.fillStyle = fillColor;
+      ctx.strokeStyle = 'rgba(255,255,255,0.16)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.lineTo(c.x, c.y);
+      ctx.lineTo(d0.x, d0.y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(255,255,255,0.18)';
+      ctx.beginPath();
+      ctx.moveTo(e.x, e.y);
+      ctx.lineTo(f.x, f.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.lineTo(a.x, a.y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(0,0,0,0.18)';
+      ctx.beginPath();
+      ctx.moveTo(b.x, b.y);
+      ctx.lineTo(f.x, f.y);
+      ctx.lineTo(g.x, g.y);
+      ctx.lineTo(c.x, c.y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    function drawShadow(ctx, x, y, width) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(0,0,0,0.22)';
+      ctx.beginPath();
+      ctx.ellipse(x, y, width, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
     function drawRobloxPlayer(player) {
       const baseX = player.x;
       const baseY = player.y;
       const front = player.color;
-      const side = 'rgba(0,0,0,0.14)';
-      const top = 'rgba(255,255,255,0.16)';
-      const shadow = 'rgba(0,0,0,0.14)';
+      const faceColor = '#111';
       robloxCtx.save();
-      robloxCtx.fillStyle = shadow;
-      robloxCtx.beginPath();
-      robloxCtx.ellipse(baseX, baseY + 72, 30, 10, 0, 0, Math.PI * 2);
-      robloxCtx.fill();
+      drawShadow(robloxCtx, baseX + 4, baseY + 76, 44);
 
-      // Legs
-      robloxCtx.fillStyle = front;
-      robloxCtx.fillRect(baseX - 20, baseY + 30, 16, 30);
-      robloxCtx.fillRect(baseX + 4, baseY + 30, 16, 30);
-      robloxCtx.fillStyle = side;
-      robloxCtx.beginPath();
-      robloxCtx.moveTo(baseX - 4, baseY + 30);
-      robloxCtx.lineTo(baseX, baseY + 28);
-      robloxCtx.lineTo(baseX, baseY + 60);
-      robloxCtx.lineTo(baseX - 4, baseY + 62);
-      robloxCtx.closePath();
-      robloxCtx.fill();
-      robloxCtx.beginPath();
-      robloxCtx.moveTo(baseX + 20, baseY + 30);
-      robloxCtx.lineTo(baseX + 24, baseY + 28);
-      robloxCtx.lineTo(baseX + 24, baseY + 60);
-      robloxCtx.lineTo(baseX + 20, baseY + 62);
-      robloxCtx.closePath();
-      robloxCtx.fill();
+      drawCube(robloxCtx, baseX - 20, baseY + 30, 16, 30, 10, front);
+      drawCube(robloxCtx, baseX + 4, baseY + 30, 16, 30, 10, front);
+      drawCube(robloxCtx, baseX - 20, baseY - 10, 40, 44, 12, front);
+      drawCube(robloxCtx, baseX - 16, baseY - 54, 32, 28, 10, front);
+      drawCube(robloxCtx, baseX - 36, baseY - 4, 16, 32, 10, front);
+      drawCube(robloxCtx, baseX + 20, baseY - 4, 16, 32, 10, front);
 
-      // Body cube
-      robloxCtx.fillStyle = front;
-      robloxCtx.fillRect(baseX - 20, baseY - 10, 40, 44);
-      robloxCtx.fillStyle = top;
-      robloxCtx.beginPath();
-      robloxCtx.moveTo(baseX - 20, baseY - 10);
-      robloxCtx.lineTo(baseX, baseY - 30);
-      robloxCtx.lineTo(baseX + 20, baseY - 10);
-      robloxCtx.lineTo(baseX, baseY + 10);
-      robloxCtx.closePath();
-      robloxCtx.fill();
-      robloxCtx.fillStyle = side;
-      robloxCtx.beginPath();
-      robloxCtx.moveTo(baseX + 20, baseY - 10);
-      robloxCtx.lineTo(baseX + 30, baseY - 6);
-      robloxCtx.lineTo(baseX + 30, baseY + 32);
-      robloxCtx.lineTo(baseX + 20, baseY + 42);
-      robloxCtx.closePath();
-      robloxCtx.fill();
-
-      // Head cube
-      robloxCtx.fillStyle = front;
-      robloxCtx.fillRect(baseX - 16, baseY - 54, 32, 28);
-      robloxCtx.fillStyle = top;
-      robloxCtx.beginPath();
-      robloxCtx.moveTo(baseX - 16, baseY - 54);
-      robloxCtx.lineTo(baseX, baseY - 74);
-      robloxCtx.lineTo(baseX + 16, baseY - 54);
-      robloxCtx.lineTo(baseX, baseY - 34);
-      robloxCtx.closePath();
-      robloxCtx.fill();
-      robloxCtx.fillStyle = side;
-      robloxCtx.beginPath();
-      robloxCtx.moveTo(baseX + 16, baseY - 54);
-      robloxCtx.lineTo(baseX + 24, baseY - 48);
-      robloxCtx.lineTo(baseX + 24, baseY - 22);
-      robloxCtx.lineTo(baseX + 16, baseY - 16);
-      robloxCtx.closePath();
-      robloxCtx.fill();
-
-      // Arms
-      robloxCtx.fillStyle = front;
-      robloxCtx.fillRect(baseX - 36, baseY - 4, 16, 32);
-      robloxCtx.fillRect(baseX + 20, baseY - 4, 16, 32);
-      robloxCtx.fillStyle = side;
-      robloxCtx.beginPath();
-      robloxCtx.moveTo(baseX - 20, baseY);
-      robloxCtx.lineTo(baseX - 16, baseY - 4);
-      robloxCtx.lineTo(baseX - 16, baseY + 28);
-      robloxCtx.lineTo(baseX - 20, baseY + 32);
-      robloxCtx.closePath();
-      robloxCtx.fill();
-      robloxCtx.beginPath();
-      robloxCtx.moveTo(baseX + 36, baseY);
-      robloxCtx.lineTo(baseX + 40, baseY - 4);
-      robloxCtx.lineTo(baseX + 40, baseY + 28);
-      robloxCtx.lineTo(baseX + 36, baseY + 32);
-      robloxCtx.closePath();
-      robloxCtx.fill();
-
-      // Face
-      robloxCtx.fillStyle = '#111';
+      robloxCtx.fillStyle = faceColor;
       robloxCtx.fillRect(baseX - 10, baseY - 48, 8, 8);
       robloxCtx.fillRect(baseX + 2, baseY - 48, 8, 8);
       robloxCtx.fillStyle = '#fff';
@@ -745,282 +725,62 @@
       ctx.save();
       const x = actor.x;
       const y = actor.y;
-      const armorFront = actor.isBoss ? '#2d5a2d' : '#1d4d94';
-      const armorSide = actor.isBoss ? '#4a6b3a' : '#3f7dc6';
-      const armorPanel = actor.isBoss ? '#6b8f4a' : '#5d8fd0';
-      const trim = actor.isBoss ? '#a0b050' : '#ffeb80';
-      const visor = actor.isBoss ? '#1a2a1a' : '#0f233a';
-      const metal = '#b3bac3';
-      const accent = actor.isBoss ? '#80ff80' : '#8deafc';
-      const glow = actor.isBoss ? 'rgba(100, 255, 100, 0.28)' : 'rgba(110, 230, 255, 0.24)';
+      const armor = color;
+      const accent = actor.isBoss ? '#c6e088' : '#d5f4ff';
+      const visor = actor.isBoss ? '#1a271b' : '#12223e';
+      const glow = actor.isBoss ? 'rgba(120, 255, 110, 0.22)' : 'rgba(120, 220, 255, 0.16)';
 
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = 'rgba(0,0,0,0.24)';
-
-      // Glow aura
+      drawShadow(ctx, x, y + 24, 84);
       ctx.save();
       ctx.globalAlpha = 0.16;
       ctx.fillStyle = glow;
       ctx.beginPath();
-      ctx.ellipse(x, y - 18, 70, 40, 0, 0, Math.PI * 2);
+      ctx.ellipse(x, y - 18, 74, 36, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
-      // Legs
-      ctx.fillStyle = armorFront;
-      ctx.fillRect(x - 24, y + 24, 22, 44);
-      ctx.fillRect(x + 2, y + 24, 22, 44);
-      ctx.fillStyle = armorSide;
-      ctx.beginPath();
-      ctx.moveTo(x - 2, y + 24);
-      ctx.lineTo(x, y + 20);
-      ctx.lineTo(x, y + 68);
-      ctx.lineTo(x - 2, y + 68);
-      ctx.closePath();
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(x + 24, y + 24);
-      ctx.lineTo(x + 26, y + 20);
-      ctx.lineTo(x + 26, y + 68);
-      ctx.lineTo(x + 24, y + 68);
-      ctx.closePath();
-      ctx.fill();
-      ctx.strokeRect(x - 24, y + 24, 22, 44);
-      ctx.strokeRect(x + 2, y + 24, 22, 44);
+      drawCube(ctx, x - 30, y - 42, 60, 48, 18, armor);
+      drawCube(ctx, x - 14, y - 90, 28, 28, 14, armor);
+      drawCube(ctx, x - 46, y - 36, 18, 40, 12, armor);
+      drawCube(ctx, x + 28, y - 36, 18, 40, 12, armor);
+      drawCube(ctx, x - 28, y + 12, 18, 34, 12, armor);
+      drawCube(ctx, x + 10, y + 12, 18, 34, 12, armor);
+      drawCube(ctx, x - 54, y - 54, 26, 18, 10, armor);
+      drawCube(ctx, x + 28, y - 54, 26, 18, 10, armor);
 
-      // Boots
-      ctx.fillStyle = '#11171d';
-      ctx.fillRect(x - 28, y + 62, 30, 14);
-      ctx.fillRect(x + 0, y + 62, 30, 14);
-
-      // Torso
-      ctx.fillStyle = armorFront;
-      ctx.fillRect(x - 34, y - 24, 68, 64);
-      ctx.fillStyle = armorSide;
-      ctx.beginPath();
-      ctx.moveTo(x + 34, y - 24);
-      ctx.lineTo(x + 44, y - 20);
-      ctx.lineTo(x + 44, y + 40);
-      ctx.lineTo(x + 34, y + 40);
-      ctx.closePath();
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(x - 34, y - 24);
-      ctx.lineTo(x - 44, y - 20);
-      ctx.lineTo(x - 44, y + 40);
-      ctx.lineTo(x - 34, y + 40);
-      ctx.closePath();
-      ctx.fill();
-      ctx.strokeRect(x - 34, y - 24, 68, 64);
-
-      // Chest plating
-      ctx.fillStyle = 'rgba(255,255,255,0.16)';
-      ctx.fillRect(x - 34, y - 24, 68, 14);
-      ctx.fillStyle = trim;
-      ctx.fillRect(x - 18, y - 10, 14, 24);
-      ctx.fillRect(x + 4, y - 10, 14, 24);
-      ctx.fillRect(x - 8, y + 8, 16, 32);
       ctx.fillStyle = accent;
-      ctx.fillRect(x - 12, y - 6, 6, 8);
-      ctx.fillRect(x + 6, y - 6, 6, 8);
-
-      // Pustules for Gutrot
-      if (actor.isBoss) {
-        ctx.fillStyle = '#6b8f4a';
-        ctx.beginPath();
-        ctx.arc(x - 20, y - 10, 4, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(x + 20, y + 10, 3, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(x, y - 20, 5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(x - 10, y + 20, 3, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(x + 15, y - 5, 4, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      // Core crystal
-      ctx.fillStyle = actor.isBoss ? '#80ff80' : '#7ef4ff';
-      ctx.beginPath();
-      ctx.moveTo(x, y); 
-      ctx.lineTo(x - 8, y + 14);
-      ctx.lineTo(x + 8, y + 14);
-      ctx.closePath();
-      ctx.fill();
-      ctx.strokeStyle = trim;
-      ctx.stroke();
-
-      // Aquila badge
-      ctx.fillStyle = trim;
-      ctx.beginPath();
-      ctx.moveTo(x - 8, y + 4);
-      ctx.lineTo(x, y + 18);
-      ctx.lineTo(x + 8, y + 4);
-      ctx.lineTo(x + 4, y + 10);
-      ctx.lineTo(x + 2, y + 10);
-      ctx.lineTo(x, y + 12);
-      ctx.lineTo(x - 2, y + 10);
-      ctx.lineTo(x - 4, y + 10);
-      ctx.closePath();
-      ctx.fill();
-
-      // Pauldrons
-      ctx.fillStyle = armorFront;
-      ctx.beginPath();
-      ctx.ellipse(x - 46, y - 18, 26, 22, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.ellipse(x + 46, y - 18, 26, 22, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = armorSide;
-      ctx.beginPath();
-      ctx.moveTo(x - 18, y - 12);
-      ctx.lineTo(x - 28, y - 18);
-      ctx.lineTo(x - 28, y + 6);
-      ctx.lineTo(x - 18, y + 12);
-      ctx.closePath();
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(x + 18, y - 12);
-      ctx.lineTo(x + 28, y - 18);
-      ctx.lineTo(x + 28, y + 6);
-      ctx.lineTo(x + 18, y + 12);
-      ctx.closePath();
-      ctx.fill();
-
-      if (actor.isBoss) {
-        ctx.fillStyle = '#4a8f4a';
-        ctx.beginPath();
-        ctx.moveTo(x - 60, y - 20);
-        ctx.lineTo(x - 78, y - 46);
-        ctx.lineTo(x - 66, y - 34);
-        ctx.closePath();
-        ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(x + 60, y - 20);
-        ctx.lineTo(x + 78, y - 46);
-        ctx.lineTo(x + 66, y - 34);
-        ctx.closePath();
-        ctx.fill();
-        ctx.fillStyle = '#a0ffa0';
-        ctx.beginPath();
-        ctx.moveTo(x - 46, y - 44);
-        ctx.lineTo(x - 38, y - 62);
-        ctx.lineTo(x - 30, y - 44);
-        ctx.closePath();
-        ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(x + 46, y - 44);
-        ctx.lineTo(x + 38, y - 62);
-        ctx.lineTo(x + 30, y - 44);
-        ctx.closePath();
-        ctx.fill();
-      }
-
-      // Upper arms
-      ctx.fillStyle = armorFront;
-      ctx.fillRect(x - 56, y - 12, 20, 44);
-      ctx.fillRect(x + 36, y - 12, 20, 44);
-      ctx.fillStyle = armorSide;
-      ctx.beginPath();
-      ctx.moveTo(x - 36, y - 12);
-      ctx.lineTo(x - 30, y - 20);
-      ctx.lineTo(x - 30, y + 20);
-      ctx.lineTo(x - 36, y + 28);
-      ctx.closePath();
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(x + 56, y - 12);
-      ctx.lineTo(x + 62, y - 20);
-      ctx.lineTo(x + 62, y + 20);
-      ctx.lineTo(x + 56, y + 28);
-      ctx.closePath();
-      ctx.fill();
-      ctx.strokeRect(x - 56, y - 12, 20, 44);
-      ctx.strokeRect(x + 36, y - 12, 20, 44);
-
-      // Forearms and gauntlets
-      ctx.fillStyle = armorPanel;
-      ctx.fillRect(x - 60, y + 22, 26, 16);
-      ctx.fillRect(x + 34, y + 22, 26, 16);
-      ctx.fillStyle = '#222a33';
-      ctx.fillRect(x - 62, y + 10, 20, 18);
-      ctx.fillRect(x + 42, y + 10, 20, 18);
-      ctx.strokeRect(x - 62, y + 10, 20, 18);
-      ctx.strokeRect(x + 42, y + 10, 20, 18);
-
-      // Weapon
-      const rightHandX = x + 42;
-      if (!actor.isBoss) {
-        ctx.fillStyle = metal;
-        ctx.fillRect(rightHandX + 18, y + 4, 30, 10);
-        ctx.beginPath();
-        ctx.moveTo(rightHandX + 18, y + 4);
-        ctx.lineTo(rightHandX + 48, y + 4);
-        ctx.lineTo(rightHandX + 48, y - 10);
-        ctx.lineTo(rightHandX + 20, y - 10);
-        ctx.closePath();
-        ctx.fill();
-        ctx.fillStyle = '#9aa2ab';
-        ctx.fillRect(rightHandX + 38, y - 20, 8, 18);
-      } else {
-        ctx.fillStyle = trim;
-        ctx.beginPath();
-        ctx.moveTo(rightHandX + 14, y - 6);
-        ctx.lineTo(rightHandX + 50, y - 6);
-        ctx.lineTo(rightHandX + 50, y + 10);
-        ctx.lineTo(rightHandX + 14, y + 10);
-        ctx.closePath();
-        ctx.fill();
-        ctx.fillStyle = '#d1c287';
-        ctx.fillRect(rightHandX + 34, y - 28, 12, 24);
-      }
-
-      // Helmet
-      ctx.fillStyle = armorFront;
-      ctx.beginPath();
-      ctx.ellipse(x, y - 58, 26, 26, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = armorSide;
-      ctx.beginPath();
-      ctx.moveTo(x + 16, y - 72);
-      ctx.lineTo(x + 26, y - 70);
-      ctx.lineTo(x + 26, y - 48);
-      ctx.lineTo(x + 16, y - 50);
-      ctx.closePath();
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(x - 16, y - 72);
-      ctx.lineTo(x - 26, y - 70);
-      ctx.lineTo(x - 26, y - 48);
-      ctx.lineTo(x - 16, y - 50);
-      ctx.closePath();
-      ctx.fill();
-
+      ctx.fillRect(x - 14, y - 24, 28, 10);
+      ctx.fillRect(x - 10, y - 4, 20, 8);
       ctx.fillStyle = visor;
-      ctx.fillRect(x - 16, y - 68, 32, 18);
-      ctx.strokeRect(x - 16, y - 68, 32, 18);
-      ctx.fillStyle = actor.isBoss ? '#80ff80' : '#8bf4ff';
-      ctx.fillRect(x - 8, y - 64, 16, 8);
+      ctx.fillRect(x - 16, y - 78, 32, 14);
+      ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+      ctx.strokeRect(x - 16, y - 78, 32, 14);
+      ctx.fillStyle = actor.isBoss ? '#8cff8c' : '#9ff3ff';
+      ctx.fillRect(x - 8, y - 72, 16, 6);
+
+      ctx.fillStyle = actor.isBoss ? '#7ba85a' : '#88c8ff';
+      ctx.beginPath();
+      ctx.moveTo(x + 15, y - 32);
+      ctx.lineTo(x + 22, y - 46);
+      ctx.lineTo(x + 30, y - 32);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(x - 15, y - 32);
+      ctx.lineTo(x - 22, y - 46);
+      ctx.lineTo(x - 30, y - 32);
+      ctx.closePath();
+      ctx.fill();
 
       if (actor.isBoss) {
-        ctx.fillStyle = '#80b050';
+        ctx.fillStyle = '#a4c68f';
         ctx.beginPath();
-        ctx.moveTo(x - 10, y - 86);
-        ctx.lineTo(x, y - 98);
-        ctx.lineTo(x + 10, y - 86);
+        ctx.moveTo(x - 10, y - 94);
+        ctx.lineTo(x, y - 108);
+        ctx.lineTo(x + 10, y - 94);
         ctx.closePath();
         ctx.fill();
       }
-
-      ctx.fillStyle = trim;
-      ctx.fillRect(x - 4, y - 88, 8, 24);
-      ctx.fillRect(x - 12, y - 84, 24, 8);
 
       ctx.restore();
     }
