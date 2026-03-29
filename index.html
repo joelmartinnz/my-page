@@ -673,16 +673,14 @@ function project3D(x, y, z) {
     function clamp(value, min, max) {
       return Math.max(min, Math.min(max, value));
     }
-    
-    function startFight() {
-      bossMode = false;
-      fightRunning = true;
-      const selected = getSelectedWarhammerCharacter();
-      player = {
+
+    function buildWarhammerPlayer(selected) {
+      const levelBonus = (currentLevel - 1) * 8;
+      return {
         x: 140,
         y: 220,
-        health: selected.health,
-        maxHealth: selected.health,
+        health: selected.health + levelBonus,
+        maxHealth: selected.health + levelBonus,
         action: 'idle',
         timer: 0,
         name: selected.name,
@@ -691,9 +689,35 @@ function project3D(x, y, z) {
         ability: selected.ability,
         abilityCooldown: 0,
         nextAttackBonus: 0,
-        shield: 0
+        shield: 0,
+        attackPower: levelBonus * 0.35
       };
-      enemy = { x: 460, y: 220, health: 120, maxHealth: 120, action: 'idle', timer: 0, cooldown: 30, isBoss: false, name: 'Chaos Champion', color: '#57a7ff' };
+    }
+
+    function buildWarhammerEnemy(isBoss) {
+      const baseHealth = isBoss ? 250 : 120;
+      const healthBonus = currentLevel * 15;
+      return {
+        x: isBoss ? 470 : 460,
+        y: 220,
+        health: baseHealth + healthBonus,
+        maxHealth: baseHealth + healthBonus,
+        action: 'idle',
+        timer: 0,
+        cooldown: isBoss ? 15 : 30,
+        isBoss,
+        name: isBoss ? 'Gutrot Spume' : 'Chaos Champion',
+        color: isBoss ? '#ffb64a' : '#57a7ff',
+        attackPower: currentLevel * 0.8
+      };
+    }
+
+    function startFight() {
+      bossMode = false;
+      fightRunning = true;
+      const selected = getSelectedWarhammerCharacter();
+      player = buildWarhammerPlayer(selected);
+      enemy = buildWarhammerEnemy(false);
       fightMessage = `Level ${currentLevel}: ${selected.name} descends into battle!`;
       document.getElementById('fightStatus').textContent = fightMessage;
       refreshAbilityDisplay();
@@ -704,22 +728,8 @@ function project3D(x, y, z) {
       bossMode = true;
       fightRunning = true;
       const selected = getSelectedWarhammerCharacter();
-      player = {
-        x: 140,
-        y: 220,
-        health: selected.health,
-        maxHealth: selected.health,
-        action: 'idle',
-        timer: 0,
-        name: selected.name,
-        color: selected.color,
-        isBoss: false,
-        ability: selected.ability,
-        abilityCooldown: 0,
-        nextAttackBonus: 0,
-        shield: 0
-      };
-      enemy = { x: 470, y: 220, health: 250, maxHealth: 250, action: 'idle', timer: 0, cooldown: 15, isBoss: true, name: 'Gutrot Spume', color: '#ffb64a' };
+      player = buildWarhammerPlayer(selected);
+      enemy = buildWarhammerEnemy(true);
       fightMessage = `Level ${currentLevel}: ${selected.name} faces Gutrot Spume!`;
       document.getElementById('fightStatus').textContent = fightMessage;
       refreshAbilityDisplay();
@@ -738,6 +748,7 @@ function project3D(x, y, z) {
       if (distance <= 130) {
         let damage = action === 'kick' ? 18 : 12;
         damage += attacker.nextAttackBonus || 0;
+        damage += attacker.attackPower || 0;
         attacker.nextAttackBonus = 0;
         if (attacker.isBoss) damage += 10;
         if (defender.isBoss && side === 'Player') damage += 8;
@@ -826,8 +837,11 @@ function project3D(x, y, z) {
           fightMessage = `${player.name || 'Guilliman'} wins Level ${currentLevel}!`;
           setTimeout(() => {
             currentLevel++;
-            if (currentLevel > 2) currentLevel = 1;
-            if (currentLevel == 2) startBossFight(); else startFight();
+            if (currentLevel % 2 === 0) {
+              startBossFight();
+            } else {
+              startFight();
+            }
           }, 3000);
         }
       }
