@@ -187,7 +187,7 @@
     <h2>Warhammer: Legendary Duel</h2>
   <p>Use A/D to move, W to strike with your blade, S to charge the enemy. Deploy Lord Guilliman in an epic clash against the Chaos Overlord.</p>
   <div class="warhammer-banner">
-    <img alt="Warhammer banner" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20320%20180%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%2307203a%22/%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%230d3a60%22/%3E%3C/linearGradient%3E%3ClinearGradient%20id%3D%22gold%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23ffe08a%22/%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23d59e3a%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D%22320%22%20height%3D%22180%22%20rx%3D%2224%22%20fill%3D%22url(%23bg)%22/%3E%3Cpath%20d%3D%22M160%2034%20L180%2070%20L224%2080%20L190%20110%20L210%20152%20L160%20130%20L110%20152%20L130%20110%20L96%2080%20L140%2070%20Z%22%20fill%3D%22url(%23gold)%22%20stroke%3D%22%23f9e2a7%22%20stroke-width%3D%226%22/%3E%3Cpath%20d%3D%22M160%20110%20L160%20166%22%20stroke%3D%22%23f9e2a7%22%20stroke-width%3D%2212%22%20stroke-linecap%3D%22round%22/%3E%3Cpath%20d%3D%22M152%20166%20L152%20180%20L168%20180%20L168%20166%22%20fill%3D%22%23f9e2a7%22/%3E%3Ctext%20x%3D%22160%22%20y%3D%22170%22%20font-family%3D%22Inter%2CArial%2Csans-serif%22%20font-size%3D%2218%22%20fill%3D%22%23e2f5ff%22%20text-anchor%3D%22middle%22%3EWARHAMMER%3C/text%3E%3C/svg%3E" />
+    <img alt="Warhammer banner" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 180'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%' stop-color='%2307203a'/%3E%3Cstop offset='100%' stop-color='%230d3a60'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='320' height='180' rx='24' fill='url(%23bg)'/%3E%3Ctext x='160' y='100' font-family='Inter,Arial,sans-serif' font-size='32' fill='%23e2f5ff' text-anchor='middle'%3EWARHAMMER%3C/text%3E%3C/svg%3E" />
   </div>
   <button id="startFightBtn" onclick="startFight()">Deploy Guilliman</button>
   <button id="startBossBtn" onclick="startBossFight()">Summon Chaos Overlord</button>
@@ -370,6 +370,7 @@
     let fightMessage = 'Press Start to deploy Lord Guilliman.';
     const fightKeys = { left: false, right: false };
     let sparks = [];
+    let currentLevel = 1;
     
     function clamp(value, min, max) {
       return Math.max(min, Math.min(max, value));
@@ -380,7 +381,7 @@
       fightRunning = true;
       player = { x: 140, y: 220, health: 120, maxHealth: 120, action: 'idle', timer: 0, name: 'Roboute Guilliman' };
       enemy = { x: 460, y: 220, health: 120, maxHealth: 120, action: 'idle', timer: 0, cooldown: 30, isBoss: false, name: 'Chaos Champion' };
-      fightMessage = 'Lord Guilliman descends with legendary fury!';
+      fightMessage = `Level ${currentLevel}: Lord Guilliman descends with legendary fury!`;
       document.getElementById('fightStatus').textContent = fightMessage;
       fightLoop();
     }
@@ -390,7 +391,7 @@
       fightRunning = true;
       player = { x: 140, y: 220, health: 120, maxHealth: 120, action: 'idle', timer: 0, name: 'Roboute Guilliman' };
       enemy = { x: 470, y: 220, health: 250, maxHealth: 250, action: 'idle', timer: 0, cooldown: 15, isBoss: true, name: 'Gutrot Spume' };
-      fightMessage = 'Gutrot Spume erupts with ruinous plague!';
+      fightMessage = `Level ${currentLevel}: Gutrot Spume erupts with ruinous plague!`;
       document.getElementById('fightStatus').textContent = fightMessage;
       fightLoop();
     }
@@ -480,7 +481,17 @@
       
       if (player.health <= 0 || enemy.health <= 0) {
         fightRunning = false;
-        fightMessage = player.health <= 0 ? `${enemy.name || 'Chaos Overlord'} wins! Click Start to fight again.` : `${player.name || 'Guilliman'} wins! Click Start to fight again.`;
+        if (player.health <= 0) {
+          fightMessage = `${enemy.name || 'Enemy'} wins! Level reset to 1. Click Start to fight again.`;
+          currentLevel = 1;
+        } else {
+          fightMessage = `${player.name || 'Guilliman'} wins Level ${currentLevel}!`;
+          setTimeout(() => {
+            currentLevel++;
+            if (currentLevel > 2) currentLevel = 1;
+            if (currentLevel == 2) startBossFight(); else startFight();
+          }, 3000);
+        }
       }
       updateSparks();
       
