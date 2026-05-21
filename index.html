@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>awesome games arcade</title>
+  <title>awesome games arcad  e</title>
   <style>
     body {
       margin: 0;
@@ -619,7 +619,7 @@ function project3D(x, y, z) {
     resetRobloxGame();
 
     const warhammerCharacters = {
-      roboute: { name: 'Roboute Guilliman', health: 140, color: '#a8f8ff', ability: { name: 'Phoenix Spear', description: 'Power strike that ignores armor and deals heavy damage.', cooldown: 90, execute(player, enemy) { const distance = Math.abs(player.x - enemy.x); if (distance <= 240) { const damage = 30; enemy.health = Math.max(0, enemy.health - damage); return `Phoenix Spear strikes for ${damage}!`; } return 'Phoenix Spear missed because the enemy is too far.'; } } },
+      roboute: { name: 'Roboute Guilliman', health: 140, color: '#a8f8ff', ability: { name: "Emperor's Sword", description: 'Power strike that ignores armor and deals heavy damage.', cooldown: 2, execute(player, enemy) { const distance = Math.abs(player.x - enemy.x); if (distance <= 240) { const damage = 30; enemy.health = Math.max(0, enemy.health - damage); return `Phoenix Spear strikes for ${damage}!`; } return 'Phoenix Spear missed because the enemy is too far.'; } } },
       calgar: { name: 'Marneus Calgar', health: 130, color: '#83c3ff', ability: { name: 'Battle Focus', description: 'Heal and empower your next attack.', cooldown: 80, execute(player) { const heal = Math.min(player.maxHealth - player.health, 22); player.health += heal; player.nextAttackBonus = (player.nextAttackBonus || 0) + 8; return `Calgar heals ${heal} HP and readies a stronger strike.`; } } },
       farsight: { name: 'Commander Farsight', health: 120, color: '#8fc2ff', ability: { name: 'Plasma Volley', description: 'Ranged blast that hits from afar.', cooldown: 70, execute(player, enemy) { const distance = Math.abs(player.x - enemy.x); if (distance <= 360) { const damage = 20; enemy.health = Math.max(0, enemy.health - damage); return `Plasma Volley hits for ${damage} damage!`; } return 'Plasma Volley fails to reach the target.'; } } },
       sanguinius: { name: 'Sanguinius', health: 125, color: '#ff9f9f', ability: { name: 'Winged Charge', description: 'Dash and smash the enemy with a devastating blow.', cooldown: 85, execute(player, enemy) { player.x = clamp(enemy.x - 70, 70, 360); const damage = 26; enemy.health = Math.max(0, enemy.health - damage); return `Winged Charge slams into the foe for ${damage}!`; } } },

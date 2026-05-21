@@ -110,7 +110,7 @@
       
       if (pipes.length === 0 || pipes[pipes.length - 1].x < 300) {
         const top = Math.random() * (canvas.height - 200) + 50;
-        const bottom = canvas.height - top - 150;
+        const bottom = canvas.height - top - 250;
         pipes.push({ x: canvas.width, top, bottom });
       }
     }
