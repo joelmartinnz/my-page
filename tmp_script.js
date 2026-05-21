@@ -67,14 +67,14 @@
     const ctx = canvas.getContext('2d');
     let bird = { x: 50, y: 300, velocity: 0 };
     const gravity = 0.6;
-    const jump = -12;
+    const jump = -10;
     let pipes = [];
     let score = 0;
     let gameRunning = true;
     
     function drawBird() {
       ctx.fillStyle = 'yellow';
-      ctx.fillRect(bird.x, bird.y, 20, 20);
+      ctx.fillRect(bird.x, bird.y, 60, 60);
     }
     
     function drawPipes() {
@@ -110,7 +110,7 @@
       
       if (pipes.length === 0 || pipes[pipes.length - 1].x < 300) {
         const top = Math.random() * (canvas.height - 200) + 50;
-        const bottom = canvas.height - top - 250;
+        const bottom = canvas.height - top - 150;
         pipes.push({ x: canvas.width, top, bottom });
       }
     }
