@@ -65,9 +65,9 @@
     // Flappy Bird Game
     const canvas = document.getElementById('flappyCanvas');
     const ctx = canvas.getContext('2d');
-    let bird = { x: 50, y: 300, velocity: 0 };
+    let bird = { x: 50, y: 300, velocity: 20 };
     const gravity = 0.6;
-    const jump = -10;
+    const jump = -50;
     let pipes = [];
     let score = 0;
     let gameRunning = true;
