@@ -62,7 +62,7 @@ Claim the most territory while avoiding other players' trails!
 3. Create closed loops to claim territory (shown by your color)
 4. Each loop claims points based on the enclosed area
 5. Other players can cut your trail if you haven't closed the loop yet
-6. If you hit an opponent's trail, you're eliminated and respawn after 3 seconds
+6. If you hit an opponent's trail, they are eliminated and respawn after 3 seconds
 7. The leaderboard on the right shows territory standings
 
 ## Game Mechanics
