@@ -8,10 +8,14 @@ const levels = [
 ];
 
 const skins = [
-  { id: 'default', name: 'Default', cost: 0, color: '#ffffff' },
-  { id: 'neon', name: 'Neon', cost: 80, color: '#7dfdfd' },
-  { id: 'solar', name: 'Solar', cost: 140, color: '#ffb74d' },
-  { id: 'ice', name: 'Ice', cost: 180, color: '#90d7ff' }
+  { id: 'default', name: 'Default', cost: 0, color: '#f7f7ff', emoji: '🙂', expression: 'friendly' },
+  { id: 'neon', name: 'Neon', cost: 80, color: '#7dfdfd', emoji: '😎', expression: 'cool' },
+  { id: 'solar', name: 'Solar', cost: 120, color: '#ffb74d', emoji: '🔥', expression: 'fiery' },
+  { id: 'ice', name: 'Ice', cost: 140, color: '#90d7ff', emoji: '❄️', expression: 'chill' },
+  { id: 'shadow', name: 'Shadow', cost: 160, color: '#6f6f8f', emoji: '😈', expression: 'mischief' },
+  { id: 'cosmic', name: 'Cosmic', cost: 200, color: '#c08cff', emoji: '🌟', expression: 'starry' },
+  { id: 'peach', name: 'Peach', cost: 220, color: '#ff9fb6', emoji: '😊', expression: 'soft' },
+  { id: 'lime', name: 'Lime', cost: 240, color: '#9cff6b', emoji: '😁', expression: 'energetic' }
 ];
 
 const state = {
@@ -23,6 +27,7 @@ const state = {
   ownedSkins: new Set(['default']),
   isCustomMode: false,
   customDifficulty: 2,
+  canJump: true,
   player: { x: 160, y: 420, w: 32, h: 32, vy: 0, jumpPower: -13, gravity: 0.55 },
   obstacles: [],
   scroll: 0,
@@ -78,6 +83,10 @@ function createSkinCards() {
     const preview = document.createElement('div');
     preview.className = 'skin-preview';
     preview.style.background = skin.color;
+    preview.style.display = 'grid';
+    preview.style.placeItems = 'center';
+    preview.style.fontSize = '1rem';
+    preview.textContent = skin.emoji;
 
     const details = document.createElement('div');
     details.className = 'skin-details';
@@ -85,7 +94,7 @@ function createSkinCards() {
     const title = document.createElement('strong');
     title.textContent = skin.name;
     const desc = document.createElement('span');
-    desc.textContent = skin.cost === 0 ? 'Free' : `${skin.cost} coins`;
+    desc.textContent = skin.cost === 0 ? `${skin.expression}` : `${skin.cost} coins • ${skin.expression}`;
     details.append(title, desc);
 
     const action = document.createElement('button');
@@ -144,6 +153,7 @@ function buildLevel() {
   state.player = { x: 160, y: 420, w: 32, h: 32, vy: 0, jumpPower: -13, gravity: 0.55 };
   state.scroll = 0;
   state.score = 0;
+  state.canJump = true;
   state.status = 'Ready';
   state.isRunning = false;
   createSkinCards();
@@ -155,7 +165,6 @@ function drawScene() {
   ctx.fillStyle = '#09111c';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // background grid
   ctx.strokeStyle = 'rgba(255,255,255,0.04)';
   ctx.lineWidth = 1;
   for (let x = 0; x < canvas.width; x += 80) {
@@ -183,10 +192,79 @@ function drawScene() {
   }
 
   const skin = getSkin(state.selectedSkin);
+  const px = state.player.x;
+  const py = state.player.y;
+  const size = state.player.w;
   ctx.fillStyle = skin.color;
-  ctx.fillRect(state.player.x, state.player.y, state.player.w, state.player.h);
+  ctx.fillRect(px, py, size, size);
   ctx.strokeStyle = 'rgba(255,255,255,0.6)';
-  ctx.strokeRect(state.player.x, state.player.y, state.player.w, state.player.h);
+  ctx.strokeRect(px, py, size, size);
+
+  ctx.fillStyle = '#000';
+  const eyeOffset = skin.expression === 'surprised' ? 26 : 24;
+  ctx.beginPath();
+  ctx.arc(px + 10, py + 12, 3, 0, Math.PI * 2);
+  ctx.arc(px + eyeOffset, py + 12, 3, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  if (skin.expression === 'cool') {
+    ctx.moveTo(px + 6, py + 16);
+    ctx.lineTo(px + 12, py + 18);
+    ctx.stroke();
+    ctx.fillStyle = '#000';
+    ctx.fillRect(px + 16, py + 10, 8, 4);
+  } else if (skin.expression === 'mischief') {
+    ctx.moveTo(px + 8, py + 20);
+    ctx.quadraticCurveTo(px + 16, py + 24, px + 24, py + 20);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(px + 9, py + 11);
+    ctx.lineTo(px + 13, py + 13);
+    ctx.moveTo(px + 26, py + 11);
+    ctx.lineTo(px + 22, py + 13);
+    ctx.stroke();
+  } else if (skin.expression === 'starry') {
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.moveTo(px + 8, py + 12);
+    ctx.lineTo(px + 11, py + 14);
+    ctx.lineTo(px + 9, py + 15);
+    ctx.lineTo(px + 12, py + 17);
+    ctx.lineTo(px + 7, py + 16);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(px + 24, py + 12);
+    ctx.lineTo(px + 27, py + 14);
+    ctx.lineTo(px + 25, py + 15);
+    ctx.lineTo(px + 28, py + 17);
+    ctx.lineTo(px + 23, py + 16);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#000';
+    ctx.beginPath();
+    ctx.moveTo(px + 9, py + 22);
+    ctx.lineTo(px + 23, py + 22);
+    ctx.stroke();
+  } else if (skin.expression === 'chill') {
+    ctx.moveTo(px + 8, py + 22);
+    ctx.quadraticCurveTo(px + 16, py + 26, px + 24, py + 22);
+    ctx.stroke();
+  } else if (skin.expression === 'fiery') {
+    ctx.moveTo(px + 10, py + 22);
+    ctx.lineTo(px + 12, py + 18);
+    ctx.lineTo(px + 14, py + 22);
+    ctx.lineTo(px + 16, py + 18);
+    ctx.lineTo(px + 18, py + 22);
+    ctx.stroke();
+  } else {
+    ctx.moveTo(px + 10, py + 22);
+    ctx.quadraticCurveTo(px + 16, py + 26, px + 22, py + 22);
+    ctx.stroke();
+  }
 
   ctx.fillStyle = 'rgba(255,255,255,0.75)';
   ctx.font = '18px Inter, system-ui, sans-serif';
@@ -223,6 +301,7 @@ function updateLogic() {
   if (state.player.y > 420) {
     state.player.y = 420;
     state.player.vy = 0;
+    state.canJump = true;
   }
 
   state.scroll += state.levelData.speed;
@@ -236,6 +315,11 @@ function updateLogic() {
       state.status = 'Crashed';
       state.isRunning = false;
       updateUI();
+      setTimeout(() => {
+        if (window.confirm('You died! Restart the level?')) {
+          buildLevel();
+        }
+      }, 50);
       return;
     }
   }
@@ -262,9 +346,11 @@ document.addEventListener('keydown', (event) => {
       state.isRunning = true;
       state.status = 'Playing';
       updateUI();
+      return;
     }
-    if (state.player.y >= 420) {
+    if (state.canJump) {
       state.player.vy = state.player.jumpPower;
+      state.canJump = false;
     }
   }
 });

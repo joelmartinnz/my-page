@@ -6,7 +6,7 @@ if (canvas) {
   const jump = -12;
   let pipes = [];
   let score = 0;
-  let gameRunning = true;
+  let gameRunning = false;
   let state = {
     customDrawings: { beak: null, eye: null, wing: null },
     customPartImages: { beak: null, eye: null, wing: null }
@@ -188,8 +188,16 @@ if (canvas) {
     pipes = [];
     score = 0;
     document.getElementById('flappyScore').textContent = `Score: ${score}`;
-    gameRunning = true;
-    gameLoop();
+    gameRunning = false;
+  }
+
+  function startFlappy() {
+    if (!gameRunning) {
+      if (pipes.length === 0 && score === 0) {
+        resetGame();
+      }
+      gameRunning = true;
+    }
   }
 
   function updateBirdStyle() {
@@ -280,10 +288,15 @@ if (canvas) {
   document.getElementById('flappyEye').addEventListener('change', updateBirdStyle);
   document.getElementById('flappyWing').addEventListener('change', updateBirdStyle);
 
+  document.getElementById('flappyStartBtn').addEventListener('click', startFlappy);
   canvas.addEventListener('click', flap);
   document.addEventListener('keydown', (e) => {
     if (e.code === 'Space') {
       e.preventDefault();
+      if (!gameRunning) {
+        startFlappy();
+        return;
+      }
       flap();
     }
   });
