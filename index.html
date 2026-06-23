@@ -147,6 +147,106 @@
       color: #dcecff;
       opacity: 0.95;
     }
+    .flappy-customize {
+      margin-top: 14px;
+      padding: 16px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+    }
+    .flappy-customize h3 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+      color: #d6f4ff;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .custom-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .custom-row label {
+      display: grid;
+      gap: 6px;
+      flex: 1;
+      min-width: 150px;
+      color: #dcecff;
+      font-size: 0.95rem;
+    }
+    .custom-row select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      outline: none;
+      font-size: 0.95rem;
+    }
+    .hint {
+      margin: 0;
+      color: #a9c8ff;
+      font-size: 0.88rem;
+    }
+    .flappy-draw {
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+    }
+    .flappy-draw h3 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+      color: #d6f4ff;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .flappy-draw .draw-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .flappy-draw .draw-row label {
+      display: grid;
+      gap: 6px;
+      flex: 1;
+      min-width: 150px;
+      color: #dcecff;
+    }
+    .flappy-draw canvas {
+      width: 100%;
+      max-width: 320px;
+      height: 140px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.05);
+      cursor: crosshair;
+    }
+    .flappy-draw .draw-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .flappy-draw .draw-actions button {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.08);
+      color: #eef8ff;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+    .flappy-draw .draw-actions button:hover {
+      transform: translateY(-2px);
+      background: rgba(255,255,255,0.12);
+    }
     .page-title {
       font-size: 3rem;
       margin-bottom: 0;
@@ -178,9 +278,51 @@
   
   <div class="game-card">
     <h2>Flappy Bird</h2>
-  <p>Click or press space to make the bird flap and avoid the pipes!</p>
-  <canvas id="flappyCanvas" width="400" height="400" style="border: 1px solid black;"></canvas>
-  <p id="flappyScore">Score: 0</p>
+    <p>Click or press space to make the bird flap and avoid the pipes!</p>
+    <div class="flappy-customize">
+      <h3>Customize your bird</h3>
+      <div class="custom-row">
+        <label>
+          Color
+          <select id="flappyColor">
+            <option value="yellow">Yellow</option>
+            <option value="pink">Pink</option>
+            <option value="blue">Blue</option>
+            <option value="green">Green</option>
+          </select>
+        </label>
+        <label>
+          Beak
+          <select id="flappyBeak">
+            <option value="classic">Classic</option>
+            <option value="long">Long</option>
+            <option value="pointy">Pointy</option>
+            <option value="chonk">Chonk</option>
+          </select>
+        </label>
+      </div>
+      <div class="custom-row">
+        <label>
+          Eye
+          <select id="flappyEye">
+            <option value="dot">Dot</option>
+            <option value="glow">Glow</option>
+            <option value="squint">Squint</option>
+          </select>
+        </label>
+        <label>
+          Wing
+          <select id="flappyWing">
+            <option value="straight">Straight</option>
+            <option value="flap">Flap</option>
+            <option value="spiky">Spiky</option>
+          </select>
+        </label>
+      </div>
+      <p class="hint">Choose your goofy character before playing.</p>
+    </div>
+    <canvas id="flappyCanvas" width="400" height="400" style="border: 1px solid black;"></canvas>
+    <p id="flappyScore">Score: 0</p>
   </div>
   
   <div class="game-card">

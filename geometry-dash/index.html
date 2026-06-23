@@ -29,52 +29,167 @@
       -webkit-background-clip: text;
       color: transparent;
     }
-    #menu {
+    #topPanel {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 22px;
       margin-bottom: 20px;
     }
+    #menuPanel, #shopPanel {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px;
+      padding: 18px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+      backdrop-filter: blur(8px);
+    }
+    #menuPanel h2, #shopPanel h2 {
+      font-size: 1.1rem;
+      letter-spacing: 0.1em;
+      margin-bottom: 14px;
+      text-transform: uppercase;
+      color: #d8ecff;
+    }
+    #menu {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 14px;
+    }
     .level-button {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(124, 252, 252, 0.28);
+      background: linear-gradient(180deg, rgba(22, 105, 255, 0.14), rgba(14, 25, 55, 0.75));
+      border: 1px solid rgba(93, 201, 255, 0.26);
       border-radius: 18px;
-      padding: 16px 20px;
+      padding: 16px 18px;
       color: #eef8ff;
       font-weight: 700;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.02em;
       cursor: pointer;
-      transition: transform 0.2s ease, background 0.2s ease;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
       text-align: center;
+      min-height: 74px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
     .level-button:hover {
       transform: translateY(-3px);
-      background: rgba(255,255,255,0.12);
+      border-color: rgba(255, 235, 109, 0.7);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
     }
     .level-button.active {
       border-color: #ffeb6d;
-      background: rgba(255, 235, 109, 0.12);
+      background: rgba(255, 235, 109, 0.14);
+    }
+    .shop-panel {
+      display: grid;
+      gap: 16px;
+    }
+    .skin-card {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+    .skin-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(124, 252, 252, 0.32);
+      background: rgba(255,255,255,0.08);
+    }
+    .skin-card.selected {
+      border-color: #79ffb5;
+      background: rgba(121, 255, 181, 0.14);
+    }
+    .skin-preview {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
+    }
+    .skin-details {
+      display: grid;
+      gap: 4px;
+    }
+    .skin-details strong {
+      font-size: 0.95rem;
+      color: #ffffff;
+    }
+    .skin-details span {
+      font-size: 0.82rem;
+      color: #a9c1ff;
+    }
+    .shop-action {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .shop-button {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.07);
+      color: #eef8ff;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease;
+      white-space: nowrap;
+    }
+    .shop-button:hover {
+      transform: translateY(-2px);
+      background: rgba(255,255,255,0.12);
+    }
+    #customControls {
+      display: grid;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    #customControls label {
+      font-size: 0.9rem;
+      color: #d0dfff;
+    }
+    #customControls input[type='range'] {
+      width: 100%;
+      accent-color: #7dfdfd;
+    }
+    #customControls .custom-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: #b7d0ff;
     }
     #gameInfo {
       margin-bottom: 18px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
       gap: 14px;
       align-items: center;
     }
     #gameInfo div {
-      font-size: 12px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.95rem;
       color: #cfd9ff;
     }
     #gameInfo div span {
+      display: block;
+      margin-top: 6px;
+      font-size: 1.25rem;
       font-weight: 700;
-      color: #fff;
+      color: #ffffff;
     }
     #gameCanvas {
       width: 100%;
       height: 520px;
-      background: #09111c;
+      background: radial-gradient(circle at top left, rgba(93, 201, 255, 0.12), transparent 26%),
+                  radial-gradient(circle at bottom right, rgba(255, 178, 77, 0.08), transparent 30%),
+                  #09111c;
       border: 1px solid rgba(209, 245, 255, 0.22);
       border-radius: 24px;
       display: block;
@@ -89,30 +204,71 @@
       margin-top: 16px;
     }
     .control-button {
-      padding: 10px 16px;
+      padding: 12px 18px;
       border-radius: 999px;
       border: 1px solid rgba(124, 252, 252, 0.28);
-      background: rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.08);
       color: #eef8ff;
       cursor: pointer;
       transition: transform 0.2s ease, background 0.2s ease;
     }
-    .control-button:hover { transform: translateY(-2px); background: rgba(255,255,255,0.12); }
+    .control-button:hover { transform: translateY(-2px); background: rgba(255,255,255,0.16); }
     #instructions {
       margin-top: 20px;
-      line-height: 1.6;
+      line-height: 1.8;
       color: #c8d7ff;
       font-size: 14px;
+    }
+    @media (max-width: 860px) {
+      #topPanel {
+        grid-template-columns: 1fr;
+      }
+      #gameInfo {
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+      }
     }
   </style>
 </head>
 <body>
   <div id="container">
     <h1>Geometry Dash</h1>
-    <div id="menu"></div>
+    <div id="topPanel">
+      <section id="menuPanel">
+        <h2>Choose a Level</h2>
+        <div id="menu"></div>
+        <div id="customControls">
+          <div class="custom-meta">
+            <span>Custom difficulty</span>
+            <span id="customDifficultyLabel">2</span>
+          </div>
+          <input id="difficultySlider" type="range" min="1" max="5" value="2" />
+          <div class="shop-action">
+            <button class="shop-button" id="randomBtn">Play Random Level</button>
+            <span style="color:#92d4ff; font-size:0.9rem;">Random mode</span>
+          </div>
+        </div>
+      </section>
+      <aside id="shopPanel">
+        <h2>Skin Shop</h2>
+        <div class="shop-panel">
+          <div class="shop-action">
+            <div>
+              <div style="font-size:0.83rem; color:#a3c3ff; letter-spacing:0.08em; text-transform:uppercase;">Coins</div>
+              <div style="font-size:1.7rem; font-weight:700; color:#fff;"><span id="coinsLabel">0</span> ⬠</div>
+            </div>
+            <div>
+              <div style="font-size:0.83rem; color:#a3c3ff; letter-spacing:0.08em; text-transform:uppercase;">Skin</div>
+              <div style="font-size:1.1rem; font-weight:700; color:#fff;"><span id="skinLabel">Default</span></div>
+            </div>
+          </div>
+          <div id="skinShop"></div>
+        </div>
+      </aside>
+    </div>
     <div id="gameInfo">
       <div>Level <span id="levelLabel">1</span></div>
       <div>Score <span id="scoreLabel">0</span></div>
+      <div>Coins <span id="coinsInfo">0</span></div>
       <div>Status <span id="statusLabel">Ready</span></div>
     </div>
     <canvas id="gameCanvas" width="920" height="520"></canvas>
@@ -122,7 +278,7 @@
       <button class="control-button" id="backBtn">Back to Arcade</button>
     </div>
     <div id="instructions">
-      Press SPACE to jump. Each level adds new obstacles and speed. Survive through a short geometry course and reach the end!
+      Press SPACE to jump. Complete harder levels to earn more coins, buy new skins, and play randomly generated courses.
     </div>
   </div>
   <script src="game.js"></script>
