@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atari Breakout - Brick Breaker</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    #gameContainer {
+      text-align: center;
+    }
+
+    h1 {
+      color: white;
+      margin-bottom: 20px;
+      font-size: 32px;
+    }
+
+    canvas {
+      border: 3px solid white;
+      background: #222;
+      display: block;
+      margin: 0 auto 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      cursor: none;
+    }
+
+    #score {
+      color: white;
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    #gameStatus {
+      color: white;
+      font-size: 20px;
+      margin-bottom: 15px;
+      min-height: 30px;
+    }
+
+    button {
+      padding: 12px 30px;
+      font-size: 16px;
+      background: white;
+      color: #FF6B6B;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.2s;
+      margin: 0 5px;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    #instructions {
+      color: rgba(255,255,255,0.9);
+      margin-top: 20px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div id="gameContainer">
+    <h1>🧱 Atari Breakout</h1>
+    <canvas id="gameCanvas" width="600" height="400"></canvas>
+    <div id="score">Score: 0 | Lives: 3</div>
+    <div id="gameStatus"></div>
+    <button onclick="startGame()">New Game</button>
+    <button onclick="togglePause()">Pause</button>
+    <button onclick="window.location.href='../'">Back</button>
+    <div id="instructions">
+      <p>Move mouse to control paddle | Break all bricks</p>
+      <p>🟡 Slow | 🟢 Expand | 🔵 Multi-Ball | 🟣 Extra Life</p>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
