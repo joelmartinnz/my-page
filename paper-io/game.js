@@ -1,4 +1,9 @@
-const socket = io();
+const socket = io(GAME_SERVER_URL, {
+  reconnection: true,
+  reconnectionDelay: 1000,
+  reconnectionDelayMax: 5000,
+  reconnectionAttempts: 5
+});
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 

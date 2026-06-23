@@ -7,7 +7,13 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: "*",
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:5500",
+      "http://127.0.0.1:3000",
+      "https://joelmartinnz.github.io",
+      "https://paper-io-game-production.up.railway.app"
+    ],
     methods: ["GET", "POST"]
   }
 });
@@ -229,6 +235,7 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 3000;
-httpServer.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+const HOST = process.env.HOST || '0.0.0.0';
+httpServer.listen(PORT, HOST, () => {
+  console.log(`Server running on port ${PORT}`);
 });
