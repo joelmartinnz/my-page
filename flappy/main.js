@@ -160,16 +160,16 @@ if (canvas) {
   }
 
   function gameLoop() {
-    update();
-    draw();
     if (gameRunning) {
-      requestAnimationFrame(gameLoop);
+      update();
     }
+    draw();
+    requestAnimationFrame(gameLoop);
   }
 
   function flap() {
     if (!gameRunning) {
-      resetGame();
+      startFlappy();
       return;
     }
     bird.velocity = jump;
@@ -177,10 +177,6 @@ if (canvas) {
 
   function gameOver() {
     gameRunning = false;
-    ctx.fillStyle = 'red';
-    ctx.font = '30px Arial';
-    ctx.fillText('Game Over', canvas.width / 2 - 80, canvas.height / 2);
-    ctx.fillText('Click to restart', canvas.width / 2 - 100, canvas.height / 2 + 40);
   }
 
   function resetGame() {
@@ -192,12 +188,9 @@ if (canvas) {
   }
 
   function startFlappy() {
-    if (!gameRunning) {
-      if (pipes.length === 0 && score === 0) {
-        resetGame();
-      }
-      gameRunning = true;
-    }
+    resetGame();
+    gameRunning = true;
+    gameLoop();
   }
 
   function updateBirdStyle() {

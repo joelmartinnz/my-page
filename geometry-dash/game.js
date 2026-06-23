@@ -296,22 +296,53 @@ function handleLevelComplete() {
 function updateLogic() {
   if (!state.isRunning) return;
 
+  // Apply gravity
   state.player.vy += state.player.gravity;
   state.player.y += state.player.vy;
-  if (state.player.y > 420) {
-    state.player.y = 420;
-    state.player.vy = 0;
-    state.canJump = true;
+
+  // Check platform collisions
+  let onPlatform = false;
+  for (const obs of state.obstacles) {
+    // Check if player is above platform and falling onto it
+    if (state.player.vy >= 0 &&
+        state.player.y + state.player.h <= obs.y + 2 &&
+        state.player.y + state.player.h + state.player.vy >= obs.y &&
+        state.player.x + state.player.w > obs.x - state.scroll &&
+        state.player.x < obs.x - state.scroll + obs.w) {
+      // Land on platform
+      state.player.y = obs.y - state.player.h;
+      state.player.vy = 0;
+      state.canJump = true;
+      onPlatform = true;
+    }
   }
 
+  // Keep player from falling below ground
+  if (state.player.y + state.player.h >= 480) {
+    state.player.y = 480 - state.player.h;
+    state.player.vy = 0;
+    state.canJump = true;
+    onPlatform = true;
+  }
+
+  // Lose jump if not on platform
+  if (!onPlatform && state.player.vy > 0) {
+    state.canJump = false;
+  }
+
+  // Scroll world
   state.scroll += state.levelData.speed;
   state.score += Math.round(state.levelData.speed);
 
+  // Move obstacles
   for (const obs of state.obstacles) {
     if (obs.x - state.scroll < -obs.w) {
       obs.x += 1380;
     }
-    if (collides(state.player, { x: obs.x - state.scroll, y: obs.y, w: obs.w, h: obs.h })) {
+    // Check collision with obstacle side (death)
+    if (state.player.x < obs.x - state.scroll + obs.w &&
+        state.player.x + state.player.w > obs.x - state.scroll &&
+        (state.player.y < obs.y || state.player.y >= obs.y + obs.h)) {
       state.status = 'Crashed';
       state.isRunning = false;
       updateUI();
@@ -324,6 +355,7 @@ function updateLogic() {
     }
   }
 
+  // Level complete
   if (state.scroll > 1320) {
     handleLevelComplete();
   }
