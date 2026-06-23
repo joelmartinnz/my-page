@@ -433,6 +433,10 @@ if (fightCanvas) {
     if (key === 'd' || e.code === 'ArrowRight') fightKeys.right = false;
   });
 
+  window.startFight = startFight;
+  window.startBossFight = startBossFight;
+  window.useAbility = useAbility;
+
   // initial draw
   drawFight();
 }
