@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paper.io - Multiplayer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      font-family: Arial, sans-serif;
+      background: #1a1a1a;
+      color: white;
+      overflow: hidden;
+    }
+
+    #gameContainer {
+      flex: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #gameCanvas {
+      flex: 1;
+      display: block;
+      background: #0f0f0f;
+      cursor: none;
+    }
+
+    #ui {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 100;
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    }
+
+    .stats {
+      font-size: 18px;
+      margin-bottom: 10px;
+      background: rgba(0,0,0,0.5);
+      padding: 10px 15px;
+      border-radius: 5px;
+    }
+
+    .stat-item {
+      margin: 5px 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .stat-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    #players {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.7);
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 250px;
+      z-index: 100;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .player-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .player-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    .player-info {
+      flex: 1;
+    }
+
+    .player-name {
+      font-weight: bold;
+      font-size: 13px;
+    }
+
+    .player-territory {
+      font-size: 11px;
+      color: #aaa;
+    }
+
+    #menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.95);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .menu-content {
+      text-align: center;
+      background: rgba(20,20,40,0.9);
+      padding: 40px;
+      border-radius: 15px;
+      max-width: 500px;
+    }
+
+    .menu-content h1 {
+      font-size: 48px;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #4ECDC4, #45B7D1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .menu-content p {
+      margin-bottom: 20px;
+      color: #aaa;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    #playerName {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #4ECDC4;
+      border-radius: 5px;
+      background: #1a1a1a;
+      color: white;
+      font-size: 16px;
+    }
+
+    #playerName::placeholder {
+      color: #666;
+    }
+
+    #roomId {
+      flex: 0.5;
+      padding: 12px;
+      border: 2px solid #45B7D1;
+      border-radius: 5px;
+      background: #1a1a1a;
+      color: white;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 12px 30px;
+      background: linear-gradient(135deg, #4ECDC4, #45B7D1);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    .controls {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      padding: 15px 25px;
+      border-radius: 10px;
+      font-size: 14px;
+      text-align: center;
+      color: #aaa;
+      z-index: 100;
+    }
+
+    #gameStatus {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.9);
+      padding: 30px 50px;
+      border-radius: 10px;
+      font-size: 32px;
+      text-align: center;
+      display: none;
+      z-index: 101;
+    }
+  </style>
+</head>
+<body>
+  <div id="gameContainer">
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="ui">
+      <div class="stats">
+        <div class="stat-item">
+          <span>Waiting for players...</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="players">
+      <h3 style="margin-bottom: 15px;">Players</h3>
+      <div id="playerList"></div>
+    </div>
+
+    <div class="controls">
+      WASD to move | Claim territory by closing loops | Avoid other players' trails
+    </div>
+
+    <div id="gameStatus"></div>
+  </div>
+
+  <div id="menu">
+    <div class="menu-content">
+      <h1>Paper.io</h1>
+      <p>Claim the most territory to win!</p>
+      
+      <div class="input-group">
+        <input type="text" id="playerName" placeholder="Your name" maxlength="20">
+        <input type="text" id="roomId" placeholder="Room ID" value="default">
+        <button onclick="startGame()">Play</button>
+      </div>
+
+      <p style="font-size: 12px; color: #666;">Share the Room ID with friends to play together</p>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "multiplayer-game-arcade",
+  "version": "1.0.0",
+  "description": "Multiplayer games arcade",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.5.4",
+    "cors": "^2.8.5"
+  }
+}
