@@ -133,17 +133,11 @@
       margin-bottom: 24px;
       box-shadow: 0 24px 100px rgba(0, 255, 255, 0.18);
       backdrop-filter: blur(22px);
-      transform-style: preserve-3d;
-      transform: perspective(1400px) translateZ(18px) rotateX(1deg);
       transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
     }
     .game-card:hover {
-      transform: perspective(1400px) translateY(-16px) translateZ(58px) rotateX(5deg) rotateY(-1deg);
       box-shadow: 0 45px 120px rgba(0, 255, 255, 0.35);
       border-color: rgba(0, 255, 255, 0.55);
-    }
-    .page-title {
-      transform: translateZ(40px);
     }
     .game-card h2 {
       margin-top: 0;
@@ -181,17 +175,6 @@
     <p id="result"></p>
   </div>
   
-  <div class="game-card">
-    <h2>Yes or No Guessing Game</h2>
-  <p>Think of an animal (cat, dog, bird, or fish), and I'll try to guess it by asking yes or no questions!</p>
-  <button id="startGame" onclick="startYesNoGame()">Start Game</button>
-  <div id="gameArea" style="display: none;">
-    <p id="question"></p>
-    <button onclick="answerYes()">Yes</button>
-    <button onclick="answerNo()">No</button>
-    <p id="gameResult"></p>
-  </div>
-  </div>
   
   <div class="game-card">
     <h2>Flappy Bird</h2>
@@ -268,7 +251,6 @@
   
   <script src="shared/utils.js"></script>
   <script src="guess-number/main.js"></script>
-  <script src="yesno/main.js"></script>
   <script src="flappy/main.js"></script>
   <script src="roblox/main.js"></script>
   <script src="warhammer/main.js"></script>
