@@ -249,8 +249,8 @@ function checkCollisions(player) {
         const dist = Math.sqrt(dx * dx + dy * dy);
 
         if (dist < gameState.PLAYER_RADIUS + 5) {
-          // Collision! Player dies
-          playerDies(player);
+          // Collision! The owner of the trail dies
+          playerDies(otherPlayer, player.id);
           return;
         }
       }
@@ -299,15 +299,10 @@ function calculateTerritory(trail) {
   return Math.floor(area / 100); // Normalize
 }
 
-function playerDies(player) {
+function playerDies(player, sourceId = null) {
   player.alive = false;
   player.trail = [];
-  socket.emit('playerDied');
-  
-  // Respawn after 3 seconds
-  setTimeout(() => {
-    socket.emit('respawn');
-  }, 3000);
+  socket.emit('playerDied', { targetId: player.id, sourceId });
 }
 
 function render() {

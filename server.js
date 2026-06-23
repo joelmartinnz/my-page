@@ -172,22 +172,38 @@ io.on('connection', (socket) => {
     });
   });
 
-  socket.on('playerDied', () => {
+  socket.on('playerDied', (data) => {
     const roomId = socket.roomId;
     if (!roomId) return;
 
     const room = gameRooms.get(roomId);
     if (!room) return;
 
-    const player = room.players.get(socket.id);
+    const targetId = data?.targetId || socket.id;
+    const player = room.players.get(targetId);
     if (player) {
       player.alive = false;
     }
 
     io.to(roomId).emit('playerEliminated', {
-      playerId: socket.id,
+      playerId: targetId,
       players: room.getPlayers()
     });
+
+    setTimeout(() => {
+      const respawnTarget = room.players.get(targetId);
+      if (!respawnTarget) return;
+
+      respawnTarget.x = Math.random() * GRID_SIZE;
+      respawnTarget.y = Math.random() * GRID_SIZE;
+      respawnTarget.trail = [];
+      respawnTarget.alive = true;
+
+      io.to(roomId).emit('playerRespawned', {
+        playerId: targetId,
+        players: room.getPlayers()
+      });
+    }, 3000);
   });
 
   socket.on('respawn', () => {
