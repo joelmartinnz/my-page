@@ -10,7 +10,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
 } else {
   // Production - set this to your Railway URL
   // Format: https://your-railway-project.railway.app
-  GAME_SERVER_URL = 'https://paper-io-game-production.up.railway.app';
+  GAME_SERVER_URL = 'https://web-production-be268.up.railway.app';
 }
 
 console.log('Game Server URL:', GAME_SERVER_URL);
