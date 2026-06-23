@@ -8,14 +8,14 @@ const levels = [
 ];
 
 const skins = [
-  { id: 'default', name: 'Default', cost: 0, color: '#f7f7ff', emoji: '🙂', expression: 'friendly' },
-  { id: 'neon', name: 'Neon', cost: 80, color: '#7dfdfd', emoji: '😎', expression: 'cool' },
-  { id: 'solar', name: 'Solar', cost: 120, color: '#ffb74d', emoji: '🔥', expression: 'fiery' },
-  { id: 'ice', name: 'Ice', cost: 140, color: '#90d7ff', emoji: '❄️', expression: 'chill' },
-  { id: 'shadow', name: 'Shadow', cost: 160, color: '#6f6f8f', emoji: '😈', expression: 'mischief' },
-  { id: 'cosmic', name: 'Cosmic', cost: 200, color: '#c08cff', emoji: '🌟', expression: 'starry' },
-  { id: 'peach', name: 'Peach', cost: 220, color: '#ff9fb6', emoji: '😊', expression: 'soft' },
-  { id: 'lime', name: 'Lime', cost: 240, color: '#9cff6b', emoji: '😁', expression: 'energetic' }
+  { id: 'default', name: 'Default', cost: 0, color: '#FFD700', emoji: '😊', face: 'smile' },
+  { id: 'neon', name: 'Neon', cost: 80, color: '#00FFFF', emoji: '😎', face: 'cool' },
+  { id: 'solar', name: 'Solar', cost: 120, color: '#FF6B35', emoji: '🔥', face: 'fierce' },
+  { id: 'ice', name: 'Ice', cost: 140, color: '#4DD0E1', emoji: '❄️', face: 'chill' },
+  { id: 'shadow', name: 'Shadow', cost: 160, color: '#2C2C54', emoji: '😈', face: 'mischief' },
+  { id: 'cosmic', name: 'Cosmic', cost: 200, color: '#9D4EDD', emoji: '✨', face: 'magic' },
+  { id: 'peach', name: 'Peach', cost: 220, color: '#FFB3BA', emoji: '🌸', face: 'happy' },
+  { id: 'lime', name: 'Lime', cost: 240, color: '#90EE90', emoji: '⚡', face: 'excited' }
 ];
 
 const state = {
@@ -165,6 +165,7 @@ function drawScene() {
   ctx.fillStyle = '#09111c';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+  // Grid background
   ctx.strokeStyle = 'rgba(255,255,255,0.04)';
   ctx.lineWidth = 1;
   for (let x = 0; x < canvas.width; x += 80) {
@@ -180,97 +181,181 @@ function drawScene() {
     ctx.stroke();
   }
 
+  // Ground platform
   ctx.fillStyle = '#132038';
   ctx.fillRect(0, 480, canvas.width, 40);
 
+  // Draw obstacles as platforms
   ctx.fillStyle = state.levelData.color;
   for (const obs of state.obstacles) {
     const x = obs.x - state.scroll;
     ctx.fillRect(x, obs.y, obs.w, obs.h);
     ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+    ctx.lineWidth = 2;
     ctx.strokeRect(x, obs.y, obs.w, obs.h);
   }
 
+  // Draw player cube with GD-style face
   const skin = getSkin(state.selectedSkin);
   const px = state.player.x;
   const py = state.player.y;
   const size = state.player.w;
+
+  // Cube body
   ctx.fillStyle = skin.color;
   ctx.fillRect(px, py, size, size);
-  ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+  
+  // Cube border/outline
+  ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+  ctx.lineWidth = 2;
   ctx.strokeRect(px, py, size, size);
 
-  ctx.fillStyle = '#000';
-  const eyeOffset = skin.expression === 'surprised' ? 26 : 24;
+  // Draw 3D cube effect
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+  ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.arc(px + 10, py + 12, 3, 0, Math.PI * 2);
-  ctx.arc(px + eyeOffset, py + 12, 3, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.moveTo(px + 2, py + 2);
+  ctx.lineTo(px + size - 2, py + 2);
+  ctx.lineTo(px + size - 2, py + size - 2);
+  ctx.lineTo(px + 2, py + size - 2);
+  ctx.closePath();
+  ctx.stroke();
 
-  ctx.strokeStyle = '#000';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  if (skin.expression === 'cool') {
-    ctx.moveTo(px + 6, py + 16);
-    ctx.lineTo(px + 12, py + 18);
-    ctx.stroke();
-    ctx.fillStyle = '#000';
-    ctx.fillRect(px + 16, py + 10, 8, 4);
-  } else if (skin.expression === 'mischief') {
-    ctx.moveTo(px + 8, py + 20);
-    ctx.quadraticCurveTo(px + 16, py + 24, px + 24, py + 20);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(px + 9, py + 11);
-    ctx.lineTo(px + 13, py + 13);
-    ctx.moveTo(px + 26, py + 11);
-    ctx.lineTo(px + 22, py + 13);
-    ctx.stroke();
-  } else if (skin.expression === 'starry') {
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.moveTo(px + 8, py + 12);
-    ctx.lineTo(px + 11, py + 14);
-    ctx.lineTo(px + 9, py + 15);
-    ctx.lineTo(px + 12, py + 17);
-    ctx.lineTo(px + 7, py + 16);
-    ctx.closePath();
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(px + 24, py + 12);
-    ctx.lineTo(px + 27, py + 14);
-    ctx.lineTo(px + 25, py + 15);
-    ctx.lineTo(px + 28, py + 17);
-    ctx.lineTo(px + 23, py + 16);
-    ctx.closePath();
-    ctx.fill();
-    ctx.strokeStyle = '#000';
-    ctx.beginPath();
-    ctx.moveTo(px + 9, py + 22);
-    ctx.lineTo(px + 23, py + 22);
-    ctx.stroke();
-  } else if (skin.expression === 'chill') {
-    ctx.moveTo(px + 8, py + 22);
-    ctx.quadraticCurveTo(px + 16, py + 26, px + 24, py + 22);
-    ctx.stroke();
-  } else if (skin.expression === 'fiery') {
-    ctx.moveTo(px + 10, py + 22);
-    ctx.lineTo(px + 12, py + 18);
-    ctx.lineTo(px + 14, py + 22);
-    ctx.lineTo(px + 16, py + 18);
-    ctx.lineTo(px + 18, py + 22);
-    ctx.stroke();
-  } else {
-    ctx.moveTo(px + 10, py + 22);
-    ctx.quadraticCurveTo(px + 16, py + 26, px + 22, py + 22);
-    ctx.stroke();
-  }
+  // Draw face based on skin
+  drawCubeFace(ctx, px, py, size, skin.face);
 
+  // Score display
   ctx.fillStyle = 'rgba(255,255,255,0.75)';
   ctx.font = '18px Inter, system-ui, sans-serif';
   ctx.fillText(`Level ${state.isCustomMode ? 'Random' : state.currentLevel}`, 24, 30);
   ctx.fillText(`Score ${state.score}`, 24, 54);
   ctx.fillText(`Coins ${state.coins}`, 24, 78);
+}
+
+function drawCubeFace(ctx, x, y, size, faceType) {
+  // Eyes
+  ctx.fillStyle = '#000';
+  const eyeSize = 4;
+  const eyeY = y + 10;
+  const eyeX1 = x + 8;
+  const eyeX2 = x + size - 8;
+
+  ctx.fillRect(eyeX1 - eyeSize / 2, eyeY - eyeSize / 2, eyeSize, eyeSize);
+  ctx.fillRect(eyeX2 - eyeSize / 2, eyeY - eyeSize / 2, eyeSize, eyeSize);
+
+  // Mouth based on face type
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  const mouthY = y + 20;
+  const mouthX = x + size / 2;
+
+  switch (faceType) {
+    case 'smile':
+      // Happy smile
+      ctx.beginPath();
+      ctx.arc(mouthX, mouthY, 5, 0, Math.PI);
+      ctx.stroke();
+      break;
+    case 'cool':
+      // Cool sunglasses effect - rectangles
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(eyeX1 - 4, eyeY - 3, 8, 6);
+      ctx.strokeRect(eyeX2 - 4, eyeY - 3, 8, 6);
+      ctx.beginPath();
+      ctx.moveTo(eyeX1 + 4, eyeY);
+      ctx.lineTo(eyeX2 - 4, eyeY);
+      ctx.stroke();
+      break;
+    case 'fierce':
+      // Angry face - inverted mouth
+      ctx.beginPath();
+      ctx.arc(mouthX, mouthY, 5, Math.PI, 0);
+      ctx.stroke();
+      // Angry eyes
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      ctx.arc(eyeX1, eyeY, eyeSize, 0, Math.PI * 2);
+      ctx.arc(eyeX2, eyeY, eyeSize, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    case 'chill':
+      // Relaxed face - wavy mouth
+      ctx.beginPath();
+      ctx.moveTo(mouthX - 6, mouthY - 1);
+      ctx.quadraticCurveTo(mouthX - 3, mouthY + 2, mouthX, mouthY);
+      ctx.quadraticCurveTo(mouthX + 3, mouthY + 2, mouthX + 6, mouthY - 1);
+      ctx.stroke();
+      break;
+    case 'mischief':
+      // Mischievous grin - off-center smile
+      ctx.beginPath();
+      ctx.arc(mouthX + 2, mouthY, 5, 0, Math.PI);
+      ctx.stroke();
+      // Raised eyebrow effect
+      ctx.beginPath();
+      ctx.moveTo(eyeX1 - 5, eyeY - 3);
+      ctx.lineTo(eyeX1 + 5, eyeY - 5);
+      ctx.stroke();
+      break;
+    case 'magic':
+      // Magical sparkle eyes
+      ctx.fillStyle = '#FFD700';
+      ctx.beginPath();
+      ctx.arc(eyeX1, eyeY, eyeSize + 1, 0, Math.PI * 2);
+      ctx.arc(eyeX2, eyeY, eyeSize + 1, 0, Math.PI * 2);
+      ctx.fill();
+      // Star mouth
+      drawStar(ctx, mouthX, mouthY, 4, 3, 2);
+      break;
+    case 'happy':
+      // Big happy smile with wrinkles
+      ctx.beginPath();
+      ctx.arc(mouthX, mouthY, 6, 0, Math.PI);
+      ctx.stroke();
+      // Happy cheeks
+      ctx.strokeStyle = 'rgba(255,100,100,0.4)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(x + 4, eyeY + 2, 3, 0, Math.PI * 2);
+      ctx.arc(x + size - 4, eyeY + 2, 3, 0, Math.PI * 2);
+      ctx.stroke();
+      break;
+    case 'excited':
+      // Wide excited mouth
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(mouthX - 7, mouthY - 2);
+      ctx.lineTo(mouthX - 7, mouthY + 4);
+      ctx.lineTo(mouthX + 7, mouthY + 4);
+      ctx.lineTo(mouthX + 7, mouthY - 2);
+      ctx.stroke();
+      break;
+    default:
+      // Default smile
+      ctx.beginPath();
+      ctx.arc(mouthX, mouthY, 5, 0, Math.PI);
+      ctx.stroke();
+  }
+}
+
+function drawStar(ctx, x, y, size, points, innerSize) {
+  ctx.fillStyle = '#FFD700';
+  ctx.beginPath();
+  for (let i = 0; i < points * 2; i++) {
+    const radius = i % 2 === 0 ? size : innerSize;
+    const angle = (i * Math.PI) / points - Math.PI / 2;
+    const px = x + Math.cos(angle) * radius;
+    const py = y + Math.sin(angle) * radius;
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fill();
 }
 
 function handleLevelComplete() {
@@ -359,10 +444,6 @@ function updateLogic() {
   if (state.scroll > 1320) {
     handleLevelComplete();
   }
-}
-
-function collides(a, b) {
-  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 }
 
 function gameLoop() {
