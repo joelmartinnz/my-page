@@ -326,6 +326,29 @@
       <button id="flappyStartBtn">Start</button>
       <p id="flappyScore" style="margin: 0;">Score: 0</p>
     </div>
+
+    <div class="flappy-draw">
+      <h3>Customize your bird</h3>
+      <div class="draw-row">
+        <label>
+          Part
+          <select id="flappyDrawPart">
+            <option value="beak">Beak</option>
+            <option value="eye">Eye</option>
+            <option value="wing">Wing</option>
+          </select>
+        </label>
+        <label>
+          Color
+          <input id="flappyDrawColor" type="color" value="#ff0000">
+        </label>
+      </div>
+      <canvas id="flappyDrawCanvas" width="320" height="140"></canvas>
+      <div class="draw-actions">
+        <button id="flappyClearDraw" type="button">Clear</button>
+        <button id="flappySaveDraw" type="button">Save</button>
+      </div>
+    </div>
   </div>
   
   <div class="game-card">

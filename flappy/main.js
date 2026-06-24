@@ -13,7 +13,7 @@ if (canvas) {
   };
 
   const drawCanvas = document.getElementById('flappyDrawCanvas');
-  const drawCtx = drawCanvas.getContext('2d');
+  const drawCtx = drawCanvas ? drawCanvas.getContext('2d') : null;
   const drawPartSelect = document.getElementById('flappyDrawPart');
   const drawColorInput = document.getElementById('flappyDrawColor');
   const drawClearBtn = document.getElementById('flappyClearDraw');
@@ -201,12 +201,14 @@ if (canvas) {
   }
 
   function clearDrawCanvas() {
+    if (!drawCtx || !drawCanvas) return;
     drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
     drawCtx.fillStyle = 'rgba(255,255,255,0.06)';
     drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
   }
 
   function loadDrawPreview() {
+    if (!drawCtx || !drawCanvas || !drawPartSelect) return;
     clearDrawCanvas();
     const part = drawPartSelect.value;
     if (state.customDrawings[part]) {
@@ -219,6 +221,7 @@ if (canvas) {
   }
 
   function saveDrawnPart() {
+    if (!drawCtx || !drawCanvas || !drawPartSelect) return;
     const part = drawPartSelect.value;
     state.customDrawings[part] = drawCanvas.toDataURL();
     const image = new Image();
@@ -231,6 +234,7 @@ if (canvas) {
   }
 
   function getDrawPointerPosition(event) {
+    if (!drawCanvas) return { x: 0, y: 0 };
     const rect = drawCanvas.getBoundingClientRect();
     const x = ((event.clientX || event.touches[0].clientX) - rect.left) * (drawCanvas.width / rect.width);
     const y = ((event.clientY || event.touches[0].clientY) - rect.top) * (drawCanvas.height / rect.height);
@@ -239,6 +243,7 @@ if (canvas) {
 
   let drawing = false;
   function startDrawing(event) {
+    if (!drawCtx || !drawCanvas || !drawColorInput) return;
     drawing = true;
     drawCtx.strokeStyle = drawColorInput.value;
     drawCtx.lineWidth = 8;
@@ -250,7 +255,7 @@ if (canvas) {
   }
 
   function drawPointer(event) {
-    if (!drawing) return;
+    if (!drawing || !drawCtx) return;
     const pos = getDrawPointerPosition(event);
     drawCtx.lineTo(pos.x, pos.y);
     drawCtx.stroke();
@@ -261,20 +266,30 @@ if (canvas) {
     drawing = false;
   }
 
-  drawCanvas.addEventListener('mousedown', startDrawing);
-  drawCanvas.addEventListener('mousemove', drawPointer);
-  drawCanvas.addEventListener('mouseup', stopDrawing);
-  drawCanvas.addEventListener('mouseleave', stopDrawing);
-  drawCanvas.addEventListener('touchstart', startDrawing);
-  drawCanvas.addEventListener('touchmove', drawPointer);
-  drawCanvas.addEventListener('touchend', stopDrawing);
+  if (drawCanvas) {
+    drawCanvas.addEventListener('mousedown', startDrawing);
+    drawCanvas.addEventListener('mousemove', drawPointer);
+    drawCanvas.addEventListener('mouseup', stopDrawing);
+    drawCanvas.addEventListener('mouseleave', stopDrawing);
+    drawCanvas.addEventListener('touchstart', startDrawing);
+    drawCanvas.addEventListener('touchmove', drawPointer);
+    drawCanvas.addEventListener('touchend', stopDrawing);
+  }
 
-  drawPartSelect.addEventListener('change', loadDrawPreview);
-  drawColorInput.addEventListener('change', () => {
-    drawCtx.strokeStyle = drawColorInput.value;
-  });
-  drawClearBtn.addEventListener('click', clearDrawCanvas);
-  drawSaveBtn.addEventListener('click', saveDrawnPart);
+  if (drawPartSelect) {
+    drawPartSelect.addEventListener('change', loadDrawPreview);
+  }
+  if (drawColorInput && drawCtx) {
+    drawColorInput.addEventListener('change', () => {
+      drawCtx.strokeStyle = drawColorInput.value;
+    });
+  }
+  if (drawClearBtn) {
+    drawClearBtn.addEventListener('click', clearDrawCanvas);
+  }
+  if (drawSaveBtn) {
+    drawSaveBtn.addEventListener('click', saveDrawnPart);
+  }
 
   document.getElementById('flappyColor').addEventListener('change', updateBirdStyle);
   document.getElementById('flappyBeak').addEventListener('change', updateBirdStyle);
