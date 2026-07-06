@@ -7,11 +7,19 @@ Status: Planning Complete - Awaiting Approval
   - Implemented a project foundation with engine bootstrap, runtime loop, input abstraction, scene shell, and initial tests.
   - Verification: static error scan reported no issues in the new engine modules.
   - Note: Runtime execution could not be fully verified in this environment because Node.js is not currently installed.
-- Milestone 2: In Progress
+- Milestone 2: Completed
   - Implemented a basic 3D camera projection system and a renderer that can clear the viewport, draw a grid, and project simple scene entities.
   - Verification: static error scan reported no issues in the new camera, renderer, and engine integration modules.
-  - Note: Runtime execution remains blocked by the missing Node.js runtime in this environment.
-  - Next focus: Milestone 3 chunk system and terrain generation.
+- Milestone 3: In Progress
+  - Implemented a chunk data structure and a deterministic terrain generator that produces layered voxel surfaces.
+  - Verification: static error scan reported no issues in the new world modules and regression tests.
+  - Note: Runtime execution remains blocked by the missing Node.js runtime in this environment, but a browser preview is now available for visual inspection.
+  - Next focus: Milestone 4 biome, lighting, and world streaming integration.
+
+### Playtest Status
+- Full gameplay is not yet available because the player controller, inventory, crafting, and combat systems are still later milestones.
+- A lightweight browser preview is available in the repository at [voxel-preview.html](voxel-preview.html) for inspecting the terrain generation work.
+- The next major milestone will add richer biome variation, lighting, and chunk streaming behavior.
 
 ## 1. GAME OVERVIEW
 
