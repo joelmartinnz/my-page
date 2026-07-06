@@ -17,7 +17,7 @@ let mouseX = canvas.width / 2;
 const POWER_UP_TYPES = {
   SLOW: { color: '#FFD700', symbol: '🟡', speedMod: 0.5 },
   EXPAND: { color: '#00FF00', symbol: '🟢', paddleWMod: 1.5 },
-  MULTI_BALL: { color: '#0066FF', symbol: '🔵', multiplier: 2 },
+  MULTI_BALL: { color: '#0066FF', symbol: '🔵', multiplier: 20000 },
   EXTRA_LIFE: { color: '#9933FF', symbol: '🟣', lives: 1 }
 };
 
