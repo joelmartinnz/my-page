@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voxel Preview 3D</title>
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, sans-serif;
+      background: radial-gradient(circle at top, #1a3d57 0%, #09131d 45%, #050913 100%);
+      color: #f3fbff;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .panel {
+      width: min(96vw, 1100px);
+      background: rgba(7, 16, 28, 0.92);
+      border: 1px solid rgba(112, 220, 255, 0.24);
+      border-radius: 28px;
+      padding: 20px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.35);
+    }
+    h1 { margin-top: 0; margin-bottom: 8px; }
+    p { max-width: 780px; line-height: 1.5; }
+    canvas {
+      width: 100%;
+      display: block;
+      border-radius: 22px;
+      background: linear-gradient(180deg, #102638 0%, #0b1520 100%);
+      border: 1px solid rgba(120, 220, 255, 0.22);
+      box-shadow: inset 0 0 70px rgba(0,0,0,0.3);
+    }
+    .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 16px;
+      background: linear-gradient(135deg, #57e7ff, #1b8ce8);
+      color: #032132;
+      font-weight: 700;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h1>Voxel Preview 3D</h1>
+    <p>This preview now uses a 3D-style voxel scene with depth, lighting, and animated camera movement to better reflect the AAA-style direction of the project.</p>
+    <div class="controls">
+      <button id="rerenderBtn">Refresh Scene</button>
+    </div>
+    <canvas id="voxelCanvas" width="1100" height="620"></canvas>
+  </div>
+  <script src="./voxel-preview-3d.js"></script>
+</body>
+</html>

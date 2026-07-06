@@ -601,10 +601,12 @@ The content system will support a complete, data-driven Minecraft-style block re
 1. Do not skip ahead to future milestones.
 2. Complete each milestone in order.
 3. After each milestone, update this plan, mark tasks complete, record optimizations, and note future improvements.
-4. Stop and await approval before beginning the next milestone.
-5. Avoid rewriting completed systems unless absolutely necessary.
-6. Treat this document as the master authority for the project.
-7. Follow AAA-grade production discipline at all times.
+4. Stop and await review before beginning the next milestone.
+5. A milestone is not considered complete until it is visually and functionally credible in review.
+6. Avoid rewriting completed systems unless absolutely necessary.
+7. Treat this document as the master authority for the project.
+8. Follow AAA-grade production discipline at all times.
+9. Any milestone that is only a placeholder or a low-fidelity prototype is considered incomplete until it is upgraded to a reviewable state.
 
 ---
 
