@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voxel Game</title>
+  <style>
+    body { margin: 0; background: #050913; color: #f2fbff; font-family: Inter, system-ui, sans-serif; }
+    canvas { display: block; width: 100vw; height: 100vh; cursor: crosshair; }
+    .hud { position: fixed; inset: 0; pointer-events: none; }
+    .crosshair { position: absolute; left: 50%; top: 50%; width: 20px; height: 20px; transform: translate(-50%, -50%); border: 2px solid rgba(255,255,255,0.8); border-radius: 50%; }
+    .hint { position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.45); padding: 12px 14px; border-radius: 10px; }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="1280" height="720"></canvas>
+  <div class="hud">
+    <div class="crosshair"></div>
+    <div class="hint">WASD to move · Mouse to look · Space to jump</div>
+  </div>
+  <script src="./game.js"></script>
+</body>
+</html>
