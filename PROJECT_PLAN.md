@@ -604,10 +604,12 @@ The content system will support a complete, data-driven Minecraft-style block re
 3. After each milestone, update this plan, mark tasks complete, record optimizations, and note future improvements.
 4. Stop and await review before beginning the next milestone.
 5. A milestone is not considered complete until it is visually and functionally credible in review.
-6. Avoid rewriting completed systems unless absolutely necessary.
-7. Treat this document as the master authority for the project.
-8. Follow AAA-grade production discipline at all times.
-9. Any milestone that is only a placeholder or a low-fidelity prototype is considered incomplete until it is upgraded to a reviewable state.
+6. Each milestone must satisfy a professional acceptance checklist before it is marked complete.
+7. Professional acceptance means the milestone is stable, understandable, testable, and strong enough that a professional studio reviewer would consider it worthy of continued production investment.
+8. Avoid rewriting completed systems unless absolutely necessary.
+9. Treat this document as the master authority for the project.
+10. Follow AAA-grade production discipline at all times.
+11. Any milestone that is only a placeholder or a low-fidelity prototype is considered incomplete until it is upgraded to a reviewable state.
 
 ---
 
