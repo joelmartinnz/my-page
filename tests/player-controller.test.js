@@ -12,3 +12,16 @@ test('player controller supports first-person movement and rotation', () => {
   assert.ok(player.position.x !== 0 || player.position.z !== 0);
   assert.equal(typeof player.rotation.yaw, 'number');
 });
+
+test('player controller supports sprinting and grounded state changes', () => {
+  const player = new PlayerController({ speed: 0.12 });
+
+  player.setSprint(true);
+  assert.equal(player.speed, 0.204);
+
+  player.setSprint(false);
+  assert.equal(player.speed, 0.12);
+
+  player.setGrounded(true);
+  assert.equal(player.state.grounded, true);
+});

@@ -4,34 +4,42 @@ class PlayerController {
     this.velocity = { x: 0, y: 0, z: 0 };
     this.rotation = { yaw: 0, pitch: 0 };
     this.height = options.height || 1.8;
-    this.speed = options.speed || 0.12;
+    this.baseSpeed = options.speed || 0.12;
+    this.speed = this.baseSpeed;
     this.fov = options.fov || 70;
     this.mode = options.mode || 'first-person';
     this.state = {
       grounded: false,
       health: 100,
-      stamina: 100
+      stamina: 100,
+      inventory: [],
+      selectedSlot: 0
     };
+    this.collisionRadius = 0.3;
+    this.targetBlock = null;
   }
 
   move(direction, deltaTime = 1) {
     const amount = this.speed * deltaTime;
+    let nextX = this.position.x;
+    let nextZ = this.position.z;
+
     switch (direction) {
       case 'forward':
-        this.position.z -= Math.sin(this.rotation.yaw) * amount;
-        this.position.x += Math.cos(this.rotation.yaw) * amount;
+        nextX += Math.cos(this.rotation.yaw) * amount;
+        nextZ += Math.sin(this.rotation.yaw) * amount;
         break;
       case 'backward':
-        this.position.z += Math.sin(this.rotation.yaw) * amount;
-        this.position.x -= Math.cos(this.rotation.yaw) * amount;
+        nextX -= Math.cos(this.rotation.yaw) * amount;
+        nextZ -= Math.sin(this.rotation.yaw) * amount;
         break;
       case 'left':
-        this.position.x -= Math.sin(this.rotation.yaw) * amount;
-        this.position.z -= Math.cos(this.rotation.yaw) * amount;
+        nextX -= Math.sin(this.rotation.yaw) * amount;
+        nextZ -= Math.cos(this.rotation.yaw) * amount;
         break;
       case 'right':
-        this.position.x += Math.sin(this.rotation.yaw) * amount;
-        this.position.z += Math.cos(this.rotation.yaw) * amount;
+        nextX += Math.sin(this.rotation.yaw) * amount;
+        nextZ -= Math.cos(this.rotation.yaw) * amount;
         break;
       case 'jump':
         if (this.state.grounded) {
@@ -43,7 +51,19 @@ class PlayerController {
         break;
     }
 
+    if (!this.checkCollision(nextX, this.position.y, nextZ)) {
+      this.position.x = nextX;
+      this.position.z = nextZ;
+    }
+
     return this.position;
+  }
+
+  checkCollision(x, y, z) {
+    const checkX = Math.floor(x);
+    const checkY = Math.floor(y);
+    const checkZ = Math.floor(z);
+    return checkX < -1 || checkX > 1 || checkZ < -1 || checkZ > 1;
   }
 
   rotate(yawDelta, pitchDelta) {
@@ -55,6 +75,44 @@ class PlayerController {
   setMode(mode) {
     this.mode = mode;
     return this.mode;
+  }
+
+  setSprint(isSprinting) {
+    this.speed = isSprinting ? this.baseSpeed * 1.7 : this.baseSpeed;
+    return this.speed;
+  }
+
+  setGrounded(isGrounded) {
+    this.state.grounded = isGrounded;
+    return this.state.grounded;
+  }
+
+  addToInventory(blockType) {
+    this.state.inventory.push(blockType);
+    return this.state.inventory;
+  }
+
+  removeFromInventory(index = this.state.selectedSlot) {
+    if (index >= 0 && index < this.state.inventory.length) {
+      return this.state.inventory.splice(index, 1)[0];
+    }
+    return null;
+  }
+
+  selectSlot(slotIndex) {
+    if (slotIndex >= 0 && slotIndex < 9) {
+      this.state.selectedSlot = slotIndex;
+    }
+    return this.state.selectedSlot;
+  }
+
+  getSelectedBlock() {
+    return this.state.inventory[this.state.selectedSlot] || null;
+  }
+
+  setTargetBlock(block) {
+    this.targetBlock = block;
+    return this.targetBlock;
   }
 
   getViewState() {
