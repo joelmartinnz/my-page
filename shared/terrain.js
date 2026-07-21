@@ -1,4 +1,4 @@
-function getTerrainHeight(x, z) {
+savefunction getTerrainHeight(x, z) {
   const ridge = Math.sin(x * 0.16) * 1.8 + Math.cos(z * 0.13) * 1.4;
   const detail = Math.sin((x + z) * 0.24) * 0.65;
   return Math.max(0.2, ridge + detail);

@@ -533,7 +533,7 @@ The architecture will be designed for future expansion without major rewrites by
 - Netherbound: Fire-based terrain, lava seas, volcanic structures, and hostile biomes.
 - Skyreach: Floating islands, cloud forests, and aerial hazards.
 - Deepvoid: Dark subterranean realms with void corruption and rare resources.
-
+- Voxle World : Main world like the overworld in minecraft 
 ### Biomes
 - Crystal Plains
 - Ember Wastes
@@ -541,6 +541,7 @@ The architecture will be designed for future expansion without major rewrites by
 - Verdant Jungle
 - Shattered Cliffs
 - Arcane Forest
+- Deathly Chambers 
 
 ### Blocks
 The content system will support a complete, data-driven Minecraft-style block registry, including the full vanilla block families and variants across all major categories:
@@ -564,18 +565,17 @@ The content system will support a complete, data-driven Minecraft-style block re
 - Frostcrawler
 - Void Wraith
 - Sky Serpent
-
+- End Whales 
+- Voidling 
 ### Bosses
 - Titan of Cinders
 - Frost Monarch
 - Void Harvester
 - Sky Leviathan
-
+- Void Titan 
+- Deep death
 ### Crafting Stations
-- Arcane Forge
-- Crystal Loom
-- Mechanist Bench
-- Alchemy Crucible
+-  
 
 ### Game Modes
 - Hardcore
@@ -584,7 +584,6 @@ The content system will support a complete, data-driven Minecraft-style block re
 - Seasonal Events
 
 ### Other Expansions
-- Multiplayer
 - Vehicles
 - Magic
 - Skills
@@ -594,6 +593,7 @@ The content system will support a complete, data-driven Minecraft-style block re
 - More Bosses
 - More Biomes
 - More Crafting Stations
+
 
 ---
 

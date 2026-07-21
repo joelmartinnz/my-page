@@ -95,7 +95,7 @@ if (canvas) {
     if (eyeImage) {
       ctx.drawImage(eyeImage, bird.x + 10, bird.y + 8, 12, 12);
     } else {
-      ctx.fillStyle = '#000';
+      ctx.fillStyle = '#f7f2f2';
       if (bird.eye === 'glow') {
         ctx.beginPath();
         ctx.arc(bird.x + 16, bird.y + 10, 5, 0, Math.PI * 2);
@@ -110,7 +110,7 @@ if (canvas) {
         ctx.beginPath();
         ctx.arc(bird.x + 16, bird.y + 12, 4, 0, Math.PI * 2);
         ctx.fill();
-      }
+      }hello when is my limit resetGame
     }
   }
 

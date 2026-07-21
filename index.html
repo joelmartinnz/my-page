@@ -55,6 +55,12 @@
       box-shadow: 0 18px 40px rgba(0, 255, 255, 0.28);
       filter: brightness(1.05);
     }
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.65;
+      transform: none;
+      box-shadow: none;
+    }
     canvas {
       display: block;
       max-width: 100%;
@@ -401,14 +407,14 @@
   </div>
 
   <div class="game-card">
-    <h2>Voxel World Prototype</h2>
-    <p>Enter the early first-person voxel experience and inspect the player-view prototype directly.</p>
+    <h2>Voxel World</h2>
+    <p>Enter the first-person voxel experience and inspect the current player-view milestone directly.</p>
     <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px;">
       <button onclick="window.location.href='game.html'">Enter Game</button>
-      <p style="margin: 0; font-weight: 700; color: #dcecff;">First-person voxel prototype</p>
+      <p style="margin: 0; font-weight: 700; color: #dcecff;">First-person voxel milestone</p>
     </div>
   </div>
-  
+
   <script src="shared/utils.js"></script>
   <script src="guess-number/main.js"></script>
   <script src="flappy/main.js"></script>
