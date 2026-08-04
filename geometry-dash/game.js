@@ -2,9 +2,9 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 const levels = [
-  { id: 1, name: 'Beginner', speed: 3.2, reward: 40, obstacles: [ { x: 620, y: 460, w: 60, h: 60 }, { x: 900, y: 420, w: 60, h: 100 } ], color: '#5a98ff' },
-  { id: 2, name: 'Jump Rush', speed: 4.2, reward: 70, obstacles: [ { x: 620, y: 460, w: 60, h: 60 }, { x: 840, y: 420, w: 60, h: 100 }, { x: 1040, y: 360, w: 60, h: 160 } ], color: '#ff9f4b' },
-  { id: 3, name: 'Turbo', speed: 5.0, reward: 110, obstacles: [ { x: 620, y: 460, w: 60, h: 60 }, { x: 760, y: 420, w: 60, h: 100 }, { x: 940, y: 360, w: 60, h: 160 }, { x: 1120, y: 300, w: 60, h: 210 } ], color: '#7dff72' }
+  { id: 1, name: 'Beginner', speed: 3.9, reward: 40, obstacles: [ { x: 620, y: 460, w: 60, h: 60 }, { x: 900, y: 420, w: 60, h: 100 } ], color: '#5a98ff' },
+  { id: 2, name: 'Jump Rush', speed: 4.6, reward: 70, obstacles: [ { x: 620, y: 460, w: 60, h: 60 }, { x: 840, y: 420, w: 60, h: 100 }, { x: 1040, y: 360, w: 60, h: 160 } ], color: '#ff9f4b' },
+  { id: 3, name: 'Turbo', speed: 5.4, reward: 110, obstacles: [ { x: 620, y: 460, w: 60, h: 60 }, { x: 760, y: 420, w: 60, h: 100 }, { x: 940, y: 360, w: 60, h: 160 }, { x: 1120, y: 300, w: 60, h: 210 } ], color: '#7dff72' }
 ];
 
 const skins = [
@@ -32,6 +32,7 @@ const state = {
   obstacles: [],
   scroll: 0,
   status: 'Ready',
+  levelData: null,
 };
 
 const levelButtons = document.getElementById('menu');
@@ -381,28 +382,44 @@ function handleLevelComplete() {
 function updateLogic() {
   if (!state.isRunning) return;
 
-  // Apply gravity
   state.player.vy += state.player.gravity;
   state.player.y += state.player.vy;
 
-  // Check platform collisions
   let onPlatform = false;
+  const playerLeft = state.player.x;
+  const playerRight = state.player.x + state.player.w;
+  const playerBottom = state.player.y + state.player.h;
+
   for (const obs of state.obstacles) {
-    // Check if player is above platform and falling onto it
-    if (state.player.vy >= 0 &&
-        state.player.y + state.player.h <= obs.y + 2 &&
-        state.player.y + state.player.h + state.player.vy >= obs.y &&
-        state.player.x + state.player.w > obs.x - state.scroll &&
-        state.player.x < obs.x - state.scroll + obs.w) {
-      // Land on platform
-      state.player.y = obs.y - state.player.h;
+    const obsX = obs.x - state.scroll;
+    const obsRight = obsX + obs.w;
+    const obsTop = obs.y;
+    const obsBottom = obs.y + obs.h;
+
+    if (playerRight > obsX && playerLeft < obsRight && playerBottom >= obsTop && state.player.y + state.player.h <= obsTop + 8 && state.player.vy >= 0) {
+      state.player.y = obsTop - state.player.h;
       state.player.vy = 0;
       state.canJump = true;
       onPlatform = true;
+      break;
+    }
+
+    if (playerRight > obsX && playerLeft < obsRight && playerBottom > obsTop && state.player.y < obsBottom) {
+      const horizontalOverlap = Math.min(playerRight, obsRight) - Math.max(playerLeft, obsX);
+      if (horizontalOverlap > 4) {
+        state.status = 'Crashed';
+        state.isRunning = false;
+        updateUI();
+        setTimeout(() => {
+          if (window.confirm('You died! Restart the level?')) {
+            buildLevel();
+          }
+        }, 50);
+        return;
+      }
     }
   }
 
-  // Keep player from falling below ground
   if (state.player.y + state.player.h >= 480) {
     state.player.y = 480 - state.player.h;
     state.player.vy = 0;
@@ -410,37 +427,19 @@ function updateLogic() {
     onPlatform = true;
   }
 
-  // Lose jump if not on platform
   if (!onPlatform && state.player.vy > 0) {
     state.canJump = false;
   }
 
-  // Scroll world
   state.scroll += state.levelData.speed;
   state.score += Math.round(state.levelData.speed);
 
-  // Move obstacles
   for (const obs of state.obstacles) {
     if (obs.x - state.scroll < -obs.w) {
       obs.x += 1380;
     }
-    // Check collision with obstacle side (death)
-    if (state.player.x < obs.x - state.scroll + obs.w &&
-        state.player.x + state.player.w > obs.x - state.scroll &&
-        (state.player.y < obs.y || state.player.y >= obs.y + obs.h)) {
-      state.status = 'Crashed';
-      state.isRunning = false;
-      updateUI();
-      setTimeout(() => {
-        if (window.confirm('You died! Restart the level?')) {
-          buildLevel();
-        }
-      }, 50);
-      return;
-    }
   }
 
-  // Level complete
   if (state.scroll > 1320) {
     handleLevelComplete();
   }

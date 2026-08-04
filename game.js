@@ -172,7 +172,7 @@ window.addEventListener('keydown', (event) => {
 function update() {
   const sprintMultiplier = keys.has('shift') ? 1.65 : 1;
   const movementSpeed = player.speed * sprintMultiplier;
-  
+
   let nextX = player.x;
   let nextZ = player.z;
 
@@ -196,6 +196,10 @@ function update() {
   if (!checkBlockCollision(nextX, player.y, nextZ)) {
     player.x = nextX;
     player.z = nextZ;
+  }
+
+  if (keys.has(' ') && player.y <= 2.2) {
+    player.y += 0.02;
   }
 }
 
@@ -233,7 +237,7 @@ function renderHUD() {
   ctx.fillText('Voxel World', 20, 32);
   ctx.font = '14px Inter, sans-serif';
   ctx.fillText(`Position: ${player.x.toFixed(1)}, ${player.z.toFixed(1)}`, 20, 56);
-  ctx.fillText('Click to lock mouse · WASD move · Shift sprint', 20, 78);
+  ctx.fillText('Click to lock mouse · WASD move · Shift sprint · Mouse look', 20, 78);
 }
 
 function render3DScene() {
@@ -267,7 +271,7 @@ function render3DScene() {
               const distZ = worldZ - player.z;
               const dist = Math.sqrt(distX * distX + distZ * distZ);
 
-              if (dist < 12) {
+              if (dist < 14) {
                 visibleBlocks.push({
                   x: worldX,
                   y: worldY,
@@ -308,12 +312,12 @@ function renderBlock3D(worldX, worldY, worldZ, blockType) {
   rotZ = relY * sinPitch + rotZ * cosPitch;
   const rotY = tmpY;
 
-  if (rotZ <= 0.1) return;
+  if (rotZ <= 0.12) return;
 
-  const scale = 300 / rotZ;
+  const scale = 320 / rotZ;
   const screenX = canvas.width / 2 + rotX * scale;
   const screenY = canvas.height / 2 - rotY * scale;
-  const blockSize = Math.max(3, 60 / rotZ);
+  const blockSize = Math.max(3, 68 / rotZ);
 
   const colors = {
     grass: { top: '#5fce6b', side: '#3d6b32', side2: '#2a4a1f' },
