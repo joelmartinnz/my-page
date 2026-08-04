@@ -234,14 +234,15 @@ function isOpaqueBlock(x, y, z) {
 }
 
 function checkCollision(x, y, z) {
-  const radius = 0.28;
+  const radius = 0.24;
+  const offsetY = [0.12, 0.6, player.height - 0.1];
   const samplePoints = [
-    [x - radius, y + 0.15, z - radius],
-    [x + radius, y + 0.15, z - radius],
-    [x - radius, y + 0.15, z + radius],
-    [x + radius, y + 0.15, z + radius],
-    [x, y + 0.7, z],
-    [x, y + player.height - 0.1, z],
+    [x - radius, y + offsetY[0], z - radius],
+    [x + radius, y + offsetY[0], z - radius],
+    [x - radius, y + offsetY[0], z + radius],
+    [x + radius, y + offsetY[0], z + radius],
+    [x, y + offsetY[1], z],
+    [x, y + offsetY[2], z],
   ];
 
   return samplePoints.some(([px, py, pz]) => isSolidBlock(px, py, pz));
@@ -324,23 +325,27 @@ function updatePlayer() {
     moveZ /= len;
   }
 
-  const nextX = player.x + moveX;
-  if (!checkCollision(nextX, player.y, player.z)) {
-    player.x = nextX;
+  if (moveX !== 0) {
+    const nextX = player.x + moveX * moveSpeed;
+    if (!checkCollision(nextX, player.y, player.z)) {
+      player.x = nextX;
+    }
   }
 
-  const nextZ = player.z + moveZ;
-  if (!checkCollision(player.x, player.y, nextZ)) {
-    player.z = nextZ;
+  if (moveZ !== 0) {
+    const nextZ = player.z + moveZ * moveSpeed;
+    if (!checkCollision(player.x, player.y, nextZ)) {
+      player.z = nextZ;
+    }
   }
 
   if (jumpRequested && player.onGround) {
-    player.verticalVelocity = 0.24;
+    player.verticalVelocity = 0.21;
     player.onGround = false;
   }
   jumpRequested = false;
 
-  player.verticalVelocity -= 0.026;
+  player.verticalVelocity -= 0.024;
   const nextY = player.y + player.verticalVelocity;
   if (!checkCollision(player.x, nextY, player.z)) {
     player.y = nextY;
