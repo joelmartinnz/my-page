@@ -2,8 +2,8 @@ const canvas = document.getElementById('voxelCanvas');
 const ctx = canvas.getContext('2d');
 const rerenderBtn = document.getElementById('rerenderBtn');
 
-const worldSize = 18;
-const tile = 22;
+const worldSize = 16;
+const tile = 24;
 let seed = 4.2;
 let time = 0;
 
@@ -17,30 +17,32 @@ function hash(n) {
 }
 
 function getHeight(x, z) {
-  const n1 = hash(x * 0.18 + seed);
-  const n2 = hash(z * 0.18 + seed * 1.37);
-  const n3 = hash((x + z) * 0.09 + seed * 0.6);
-  const base = Math.floor((n1 * 0.55 + n2 * 0.35 + n3 * 0.1) * 8);
-  const ridge = Math.sin((x + z) * 0.16 + seed) * 1.3;
-  return clamp(base + Math.floor(ridge), 0, 8);
+  const n1 = hash(x * 0.16 + seed);
+  const n2 = hash(z * 0.17 + seed * 1.37);
+  const n3 = hash((x + z) * 0.1 + seed * 0.7);
+  const ridge = Math.sin((x + z) * 0.2 + seed) * 1.25;
+  const slope = Math.cos(x * 0.08) * 0.35 + Math.sin(z * 0.11) * 0.25;
+  const base = Math.floor((n1 * 0.5 + n2 * 0.32 + n3 * 0.18) * 8.8);
+  return clamp(base + Math.floor(ridge + slope), 0, 9);
 }
 
 function getColorForHeight(y, height) {
-  if (y <= 0) return '#4f7f6d';
-  if (y < height - 2) return '#51653d';
-  if (y < height) return '#79b661';
-  return '#8dc671';
+  if (y <= 0) return '#3e7d6e';
+  if (y < height - 2) return '#4f6c36';
+  if (y < height) return '#83bd62';
+  return '#b8f090';
 }
 
 function drawCube(x, y, z, height) {
-  const cameraOffsetX = Math.sin(time * 0.32) * 0.55;
-  const cameraOffsetZ = Math.cos(time * 0.24) * 0.45;
+  const wave = Math.sin(time * 0.8 + x * 0.8 + z * 0.7) * 0.15;
+  const cameraOffsetX = Math.sin(time * 0.3) * 0.8;
+  const cameraOffsetZ = Math.cos(time * 0.24) * 0.65;
   const screenX = canvas.width * 0.5 + (x - z + cameraOffsetX) * tile * 0.82;
-  const screenY = canvas.height * 0.62 + (x + z + cameraOffsetZ) * tile * 0.14 - y * tile * 1.1;
+  const screenY = canvas.height * 0.65 + (x + z + cameraOffsetZ) * tile * 0.14 - (y + wave) * tile * 1.12;
 
   const topColor = getColorForHeight(y, height);
-  const sideColor = y <= 0 ? '#2c4d4a' : '#4e5f39';
-  const glow = y === height ? '#d6f5ff' : '#163447';
+  const sideColor = y <= 0 ? '#2d4b45' : y < height ? '#5d713b' : '#7a8d4a';
+  const glow = y === height ? '#dff7ff' : '#183544';
 
   ctx.fillStyle = topColor;
   ctx.beginPath();
@@ -60,17 +62,29 @@ function drawCube(x, y, z, height) {
   ctx.closePath();
   ctx.fill();
 
-  ctx.fillStyle = glow;
-  ctx.fillRect(screenX + 2, screenY - tile * 0.5, tile * 0.34, tile * 0.24);
+  if (y === height) {
+    ctx.fillStyle = glow;
+    ctx.fillRect(screenX + 2, screenY - tile * 0.5, tile * 0.34, tile * 0.24);
+  }
+
+  if (y === height && Math.abs(x) + Math.abs(z) < 4 && Math.random() > 0.78) {
+    ctx.fillStyle = '#ffdd77';
+    ctx.beginPath();
+    ctx.moveTo(screenX + 8, screenY - 10);
+    ctx.lineTo(screenX + 16, screenY - 28);
+    ctx.lineTo(screenX + 24, screenY - 10);
+    ctx.closePath();
+    ctx.fill();
+  }
 }
 
 function renderScene() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   const sky = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  sky.addColorStop(0, '#122c47');
-  sky.addColorStop(0.45, '#0c1a2a');
-  sky.addColorStop(1, '#050b12');
+  sky.addColorStop(0, '#0a2343');
+  sky.addColorStop(0.48, '#091a2d');
+  sky.addColorStop(1, '#040a10');
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -86,9 +100,14 @@ function renderScene() {
     }
   }
 
-  ctx.fillStyle = 'rgba(70, 160, 255, 0.18)';
+  ctx.fillStyle = 'rgba(97, 174, 255, 0.16)';
   ctx.beginPath();
-  ctx.arc(canvas.width * 0.75, canvas.height * 0.2, 80, 0, Math.PI * 2);
+  ctx.arc(canvas.width * 0.76, canvas.height * 0.2, 92, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = 'rgba(255,255,255,0.12)';
+  ctx.beginPath();
+  ctx.arc(canvas.width * 0.18, canvas.height * 0.24, 58, 0, Math.PI * 2);
   ctx.fill();
 }
 
@@ -99,10 +118,12 @@ function animate() {
   requestAnimationFrame(animate);
 }
 
-rerenderBtn.addEventListener('click', () => {
-  seed = Math.random() * 10;
-  renderScene();
-});
+if (rerenderBtn) {
+  rerenderBtn.addEventListener('click', () => {
+    seed = Math.random() * 10;
+    renderScene();
+  });
+}
 
 renderScene();
 animate();

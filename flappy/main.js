@@ -1,12 +1,20 @@
 const canvas = document.getElementById('flappyCanvas');
 if (canvas) {
   const ctx = canvas.getContext('2d');
-  let bird = { x: 50, y: 300, velocity: 0, color: 'yellow', beak: 'classic', eye: 'dot', wing: 'straight' };
-  const gravity = 0.6;
-  const jump = -12;
+  const scoreEl = document.getElementById('flappyScore');
+  const colorEl = document.getElementById('flappyColor');
+  const beakEl = document.getElementById('flappyBeak');
+  const eyeEl = document.getElementById('flappyEye');
+  const wingEl = document.getElementById('flappyWing');
+
+  let bird = { x: 72, y: 180, velocity: 0, color: 'yellow', beak: 'classic', eye: 'dot', wing: 'straight' };
+  const gravity = 0.42;
+  const jump = -8.2;
   let pipes = [];
   let score = 0;
   let gameRunning = false;
+  let gameOvered = false;
+  let animationFrameId = null;
   let state = {
     customDrawings: { beak: null, eye: null, wing: null },
     customPartImages: { beak: null, eye: null, wing: null }
@@ -19,66 +27,99 @@ if (canvas) {
   const drawClearBtn = document.getElementById('flappyClearDraw');
   const drawSaveBtn = document.getElementById('flappySaveDraw');
 
+  function drawBackground() {
+    const sky = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    sky.addColorStop(0, '#87dcff');
+    sky.addColorStop(0.55, '#4ba7ff');
+    sky.addColorStop(1, '#ecf8ff');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+    ctx.beginPath();
+    ctx.arc(canvas.width - 90, 70, 34, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = 'rgba(255,255,255,0.42)';
+    ctx.beginPath();
+    ctx.ellipse(120, 95, 54, 24, 0, 0, Math.PI * 2);
+    ctx.ellipse(210, 112, 38, 18, 0, 0, Math.PI * 2);
+    ctx.ellipse(300, 86, 42, 20, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#73c96a';
+    ctx.fillRect(0, canvas.height - 70, canvas.width, 70);
+    ctx.fillStyle = '#5aa758';
+    ctx.fillRect(0, canvas.height - 54, canvas.width, 16);
+  }
+
   function drawBird() {
     const size = 24;
     const wingHeight = bird.wing === 'flap' ? 14 : bird.wing === 'spiky' ? 20 : 10;
-    const wingY = bird.y + 10;
+    const wingY = 10;
+    const bodyX = bird.x;
+    const bodyY = bird.y;
+
+    ctx.save();
+    ctx.translate(bodyX, bodyY);
     ctx.fillStyle = bird.color;
-    ctx.fillRect(bird.x, bird.y, size, size);
+    ctx.beginPath();
+    ctx.ellipse(size * 0.7, size * 0.7, size * 0.6, size * 0.5, 0, 0, Math.PI * 2);
+    ctx.fill();
 
     const wingImage = state.customPartImages.wing;
     if (wingImage) {
-      ctx.drawImage(wingImage, bird.x - 30, bird.y + 6, 28, 20);
+      ctx.drawImage(wingImage, -24, 8, 28, 20);
     } else {
       ctx.fillStyle = bird.color;
       if (bird.wing === 'straight') {
-        ctx.fillRect(bird.x - 10, wingY, 10, 6);
+        ctx.fillRect(-10, wingY + 6, 10, 6);
       } else if (bird.wing === 'flap') {
         ctx.beginPath();
-        ctx.moveTo(bird.x - 10, wingY);
-        ctx.lineTo(bird.x - 22, wingY + wingHeight);
-        ctx.lineTo(bird.x - 10, wingY + wingHeight + 2);
+        ctx.moveTo(-10, wingY + 6);
+        ctx.lineTo(-22, wingY + wingHeight);
+        ctx.lineTo(-10, wingY + wingHeight + 2);
         ctx.fill();
       } else {
         ctx.beginPath();
-        ctx.moveTo(bird.x - 10, wingY);
-        ctx.lineTo(bird.x - 18, wingY + 4);
-        ctx.lineTo(bird.x - 10, wingY + 10);
-        ctx.lineTo(bird.x - 18, wingY + 14);
-        ctx.lineTo(bird.x - 10, wingY + 18);
+        ctx.moveTo(-10, wingY + 6);
+        ctx.lineTo(-18, wingY + 4);
+        ctx.lineTo(-10, wingY + 10);
+        ctx.lineTo(-18, wingY + 14);
+        ctx.lineTo(-10, wingY + 18);
         ctx.fill();
       }
     }
 
     const beakImage = state.customPartImages.beak;
     if (beakImage) {
-      ctx.drawImage(beakImage, bird.x + size - 2, bird.y + 8, 28, 18);
+      ctx.drawImage(beakImage, size - 2, 8, 28, 18);
     } else {
       let beakPoints;
       if (bird.beak === 'long') {
         beakPoints = [
-          { x: bird.x + size, y: bird.y + 8 },
-          { x: bird.x + size + 18, y: bird.y + 12 },
-          { x: bird.x + size, y: bird.y + 16 }
+          { x: size, y: 8 },
+          { x: size + 18, y: 12 },
+          { x: size, y: 16 }
         ];
       } else if (bird.beak === 'pointy') {
         beakPoints = [
-          { x: bird.x + size, y: bird.y + 10 },
-          { x: bird.x + size + 12, y: bird.y + 6 },
-          { x: bird.x + size + 12, y: bird.y + 18 }
+          { x: size, y: 10 },
+          { x: size + 12, y: 6 },
+          { x: size + 12, y: 18 }
         ];
       } else if (bird.beak === 'chonk') {
         beakPoints = [
-          { x: bird.x + size, y: bird.y + 8 },
-          { x: bird.x + size + 20, y: bird.y + 8 },
-          { x: bird.x + size + 20, y: bird.y + 18 },
-          { x: bird.x + size, y: bird.y + 18 }
+          { x: size, y: 8 },
+          { x: size + 20, y: 8 },
+          { x: size + 20, y: 18 },
+          { x: size, y: 18 }
         ];
       } else {
         beakPoints = [
-          { x: bird.x + size, y: bird.y + 10 },
-          { x: bird.x + size + 12, y: bird.y + 14 },
-          { x: bird.x + size, y: bird.y + 18 }
+          { x: size, y: 10 },
+          { x: size + 12, y: 14 },
+          { x: size, y: 18 }
         ];
       }
       ctx.fillStyle = '#ff8e3c';
@@ -93,32 +134,40 @@ if (canvas) {
 
     const eyeImage = state.customPartImages.eye;
     if (eyeImage) {
-      ctx.drawImage(eyeImage, bird.x + 10, bird.y + 8, 12, 12);
+      ctx.drawImage(eyeImage, 10, 8, 12, 12);
     } else {
       ctx.fillStyle = '#f7f2f2';
       if (bird.eye === 'glow') {
         ctx.beginPath();
-        ctx.arc(bird.x + 16, bird.y + 10, 5, 0, Math.PI * 2);
+        ctx.arc(16, 10, 5, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = '#fff';
         ctx.beginPath();
-        ctx.arc(bird.x + 14, bird.y + 8, 2, 0, Math.PI * 2);
+        ctx.arc(14, 8, 2, 0, Math.PI * 2);
         ctx.fill();
       } else if (bird.eye === 'squint') {
-        ctx.fillRect(bird.x + 10, bird.y + 10, 10, 4);
+        ctx.fillRect(10, 10, 10, 4);
       } else {
         ctx.beginPath();
-        ctx.arc(bird.x + 16, bird.y + 12, 4, 0, Math.PI * 2);
+        ctx.arc(16, 12, 4, 0, Math.PI * 2);
         ctx.fill();
-      }hello when is my limit resetGame
+      }
     }
+
+    ctx.restore();
   }
 
   function drawPipes() {
-    ctx.fillStyle = 'green';
     pipes.forEach(pipe => {
-      ctx.fillRect(pipe.x, 0, 50, pipe.top);
-      ctx.fillRect(pipe.x, canvas.height - pipe.bottom, 50, pipe.bottom);
+      ctx.fillStyle = '#4fb35c';
+      ctx.fillRect(pipe.x, 0, 52, pipe.top);
+      ctx.fillStyle = '#3d8b44';
+      ctx.fillRect(pipe.x, pipe.top - 10, 52, 10);
+
+      ctx.fillStyle = '#4fb35c';
+      ctx.fillRect(pipe.x, canvas.height - pipe.bottom, 52, pipe.bottom);
+      ctx.fillStyle = '#3d8b44';
+      ctx.fillRect(pipe.x, canvas.height - pipe.bottom, 52, 10);
     });
   }
 
@@ -128,35 +177,71 @@ if (canvas) {
     bird.velocity += gravity;
     bird.y += bird.velocity;
 
-    if (bird.y + 24 > canvas.height || bird.y < 0) {
+    if (bird.y + 24 > canvas.height - 70 || bird.y < 0) {
       gameOver();
+      return;
     }
 
     pipes.forEach(pipe => {
-      pipe.x -= 2;
-      if (pipe.x + 50 < 0) {
-        pipes.shift();
-        score++;
-        document.getElementById('flappyScore').textContent = `Score: ${score}`;
+      pipe.x -= 2.2;
+      if (!pipe.passed && pipe.x + 52 < bird.x) {
+        pipe.passed = true;
+        score += 1;
+        if (scoreEl) {
+          scoreEl.textContent = `Score: ${score}`;
+        }
       }
-      if (bird.x < pipe.x + 50 && bird.x + 24 > pipe.x &&
-          (bird.y < pipe.top || bird.y + 24 > canvas.height - pipe.bottom)) {
+
+      const birdLeft = bird.x;
+      const birdRight = bird.x + 24;
+      const birdTop = bird.y;
+      const birdBottom = bird.y + 24;
+      const pipeLeft = pipe.x;
+      const pipeRight = pipe.x + 52;
+      const gapTop = pipe.top;
+      const gapBottom = canvas.height - pipe.bottom;
+
+      const hitPipe = birdRight > pipeLeft && birdLeft < pipeRight && (birdTop < gapTop || birdBottom > gapBottom);
+      if (hitPipe) {
         gameOver();
       }
     });
 
-    if (pipes.length === 0 || pipes[pipes.length - 1].x < 300) {
-      const top = Math.random() * (canvas.height - 200) + 50;
-      const bottom = canvas.height - top - 150;
-      pipes.push({ x: canvas.width, top, bottom });
+    pipes = pipes.filter(pipe => pipe.x + 52 > -20);
+
+    if (pipes.length === 0 || pipes[pipes.length - 1].x < 290) {
+      const gap = 150;
+      const top = Math.random() * (canvas.height - gap - 110) + 45;
+      const bottom = canvas.height - top - gap;
+      pipes.push({ x: canvas.width, top, bottom, passed: false });
     }
   }
 
   function draw() {
-    ctx.fillStyle = 'skyblue';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    drawBird();
+    drawBackground();
     drawPipes();
+    drawBird();
+
+    if (!gameRunning && !gameOvered) {
+      ctx.fillStyle = 'rgba(3, 16, 27, 0.68)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#f6fbff';
+      ctx.font = '700 22px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Tap or press space to start', canvas.width / 2, canvas.height / 2 - 6);
+      ctx.font = '500 14px Inter, sans-serif';
+      ctx.fillText('Avoid the pipes and chase a new high score', canvas.width / 2, canvas.height / 2 + 24);
+    } else if (gameOvered) {
+      ctx.fillStyle = 'rgba(3, 16, 27, 0.72)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#ffd166';
+      ctx.font = '700 24px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2 - 8);
+      ctx.font = '500 15px Inter, sans-serif';
+      ctx.fillStyle = '#f6fbff';
+      ctx.fillText(`Score: ${score} • Click to try again`, canvas.width / 2, canvas.height / 2 + 24);
+    }
   }
 
   function gameLoop() {
@@ -164,7 +249,7 @@ if (canvas) {
       update();
     }
     draw();
-    requestAnimationFrame(gameLoop);
+    animationFrameId = requestAnimationFrame(gameLoop);
   }
 
   function flap() {
@@ -177,27 +262,36 @@ if (canvas) {
 
   function gameOver() {
     gameRunning = false;
+    gameOvered = true;
   }
 
   function resetGame() {
-    bird = { x: 50, y: 300, velocity: 0, color: bird.color, beak: bird.beak, eye: bird.eye, wing: bird.wing };
+    const style = { color: bird.color, beak: bird.beak, eye: bird.eye, wing: bird.wing };
+    bird = { x: 72, y: 180, velocity: 0, ...style };
     pipes = [];
     score = 0;
-    document.getElementById('flappyScore').textContent = `Score: ${score}`;
+    if (scoreEl) {
+      scoreEl.textContent = `Score: ${score}`;
+    }
     gameRunning = false;
+    gameOvered = false;
   }
 
   function startFlappy() {
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+    }
     resetGame();
     gameRunning = true;
-    gameLoop();
+    gameOvered = false;
+    animationFrameId = requestAnimationFrame(gameLoop);
   }
 
   function updateBirdStyle() {
-    bird.color = document.getElementById('flappyColor').value;
-    bird.beak = document.getElementById('flappyBeak').value;
-    bird.eye = document.getElementById('flappyEye').value;
-    bird.wing = document.getElementById('flappyWing').value;
+    bird.color = colorEl ? colorEl.value : bird.color;
+    bird.beak = beakEl ? beakEl.value : bird.beak;
+    bird.eye = eyeEl ? eyeEl.value : bird.eye;
+    bird.wing = wingEl ? wingEl.value : bird.wing;
   }
 
   function clearDrawCanvas() {
@@ -291,27 +385,25 @@ if (canvas) {
     drawSaveBtn.addEventListener('click', saveDrawnPart);
   }
 
-  document.getElementById('flappyColor').addEventListener('change', updateBirdStyle);
-  document.getElementById('flappyBeak').addEventListener('change', updateBirdStyle);
-  document.getElementById('flappyEye').addEventListener('change', updateBirdStyle);
-  document.getElementById('flappyWing').addEventListener('change', updateBirdStyle);
+  if (colorEl) colorEl.addEventListener('change', updateBirdStyle);
+  if (beakEl) beakEl.addEventListener('change', updateBirdStyle);
+  if (eyeEl) eyeEl.addEventListener('change', updateBirdStyle);
+  if (wingEl) wingEl.addEventListener('change', updateBirdStyle);
 
-  document.getElementById('flappyStartBtn').addEventListener('click', startFlappy);
+  const startBtn = document.getElementById('flappyStartBtn');
+  if (startBtn) {
+    startBtn.addEventListener('click', startFlappy);
+  }
   canvas.addEventListener('click', flap);
   document.addEventListener('keydown', (e) => {
     if (e.code === 'Space') {
       e.preventDefault();
-      if (!gameRunning) {
-        startFlappy();
-        return;
-      }
       flap();
     }
   });
 
   clearDrawCanvas();
   loadDrawPreview();
-
-  // start flappy loop
-  gameLoop();
+  draw();
+  animationFrameId = requestAnimationFrame(gameLoop);
 }
