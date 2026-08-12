@@ -1,8 +1,9 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-const CHUNK_SIZE = 24;
+const CHUNK_SIZE = 16;
 const CHUNK_HEIGHT = 24;
+const RENDER_DISTANCE = 2;
 const AIR = 'air';
 const GRASS = 'grass';
 const DIRT = 'dirt';
@@ -83,67 +84,84 @@ function getSurfaceHeight(worldX, worldZ) {
   return Math.max(2, Math.floor(baseHeight + detail + ridge));
 }
 
-function buildTerrain(chunk) {
-  for (let x = 0; x < chunk.size; x += 1) {
-    for (let z = 0; z < chunk.size; z += 1) {
-      const distanceToCenter = Math.hypot(x - chunk.size / 2, z - chunk.size / 2);
-      const lakeFactor = Math.max(0, 1 - distanceToCenter / 7.6);
-      const surfaceHeight = getSurfaceHeight(x, z);
+function buildTerrainChunk(chunk, chunkX, chunkZ) {
+  for (let localX = 0; localX < chunk.size; localX += 1) {
+    for (let localZ = 0; localZ < chunk.size; localZ += 1) {
+      const worldX = chunkX * chunk.size + localX;
+      const worldZ = chunkZ * chunk.size + localZ;
+      const distanceToCenter = Math.hypot(worldX, worldZ);
+      const lakeFactor = Math.max(0, 1 - distanceToCenter / 26);
+      const surfaceHeight = getSurfaceHeight(worldX, worldZ);
       const waterSurface = WATER_LEVEL + Math.floor(lakeFactor * 2.2);
       const effectiveHeight = Math.min(surfaceHeight, waterSurface);
       const isBeach = lakeFactor > 0.22 && effectiveHeight <= waterSurface + 1;
 
-      for (let y = 0; y < chunk.height; y += 1) {
+      for (let localY = 0; localY < chunk.height; localY += 1) {
         let block = AIR;
-        if (y <= effectiveHeight) {
-          if (y === effectiveHeight) {
+        if (localY <= effectiveHeight) {
+          if (localY === effectiveHeight) {
             block = isBeach ? SAND : GRASS;
-          } else if (y >= effectiveHeight - 3) {
+          } else if (localY >= effectiveHeight - 3) {
             block = isBeach ? SAND : DIRT;
           } else {
             block = STONE;
           }
 
-          if (y < effectiveHeight - 3 && noise3D(x, y, z) > 0.93 + lakeFactor * 0.02) {
+          if (localY < effectiveHeight - 3 && noise3D(worldX, localY, worldZ) > 0.93 + lakeFactor * 0.02) {
             block = AIR;
           }
         }
 
-        if (lakeFactor > 0.1 && y > effectiveHeight && y <= waterSurface) {
+        if (lakeFactor > 0.1 && localY > effectiveHeight && localY <= waterSurface) {
           block = WATER;
         }
 
-        chunk.setBlock(x, y, z, block);
+        chunk.setBlock(localX, localY, localZ, block);
       }
     }
   }
 
-  for (let x = 3; x < chunk.size - 3; x += 6) {
-    for (let z = 3; z < chunk.size - 3; z += 6) {
-      const height = getSurfaceHeight(x, z);
-      if (noise2D(x * 0.3 + 4, z * 0.3 + 9) < 0.55) continue;
-      if (height < 8) continue;
-      for (let y = height + 1; y <= height + 4; y += 1) {
-        chunk.setBlock(x, y, z, y === height + 4 ? LEAF : WOOD);
+  for (let localX = 2; localX < chunk.size - 2; localX += 6) {
+    for (let localZ = 2; localZ < chunk.size - 2; localZ += 6) {
+      const worldX = chunkX * chunk.size + localX;
+      const worldZ = chunkZ * chunk.size + localZ;
+      const surfaceHeight = getSurfaceHeight(worldX, worldZ);
+      if (noise2D(worldX * 0.12 + 4, worldZ * 0.12 + 9) < 0.67) continue;
+      if (surfaceHeight < 8) continue;
+      for (let y = surfaceHeight + 1; y <= surfaceHeight + 4; y += 1) {
+        chunk.setBlock(localX, y, localZ, y === surfaceHeight + 4 ? LEAF : WOOD);
       }
       for (let dx = -1; dx <= 1; dx += 1) {
         for (let dz = -1; dz <= 1; dz += 1) {
           if (dx === 0 && dz === 0) continue;
-          chunk.setBlock(x + dx, height + 4, z + dz, LEAF);
+          chunk.setBlock(localX + dx, surfaceHeight + 4, localZ + dz, LEAF);
         }
       }
-      chunk.setBlock(x, height + 5, z, LEAF);
+      chunk.setBlock(localX, surfaceHeight + 5, localZ, LEAF);
     }
   }
 }
 
-const chunk = new Chunk();
-buildTerrain(chunk);
+const chunkMap = new Map();
+
+function chunkKey(chunkX, chunkZ) {
+  return `${chunkX},${chunkZ}`;
+}
+
+function ensureChunk(chunkX, chunkZ) {
+  const key = chunkKey(chunkX, chunkZ);
+  if (!chunkMap.has(key)) {
+    const chunk = new Chunk();
+    buildTerrainChunk(chunk, chunkX, chunkZ);
+    chunkMap.set(key, chunk);
+  }
+  return chunkMap.get(key);
+}
 
 const player = {
-  x: CHUNK_SIZE / 2,
-  y: getSurfaceHeight(CHUNK_SIZE / 2, CHUNK_SIZE / 2) + 2.3,
-  z: CHUNK_SIZE / 2,
+  x: 0,
+  y: getSurfaceHeight(0, 0) + 2.3,
+  z: 0,
   yaw: -0.9,
   pitch: 0,
   eyeHeight: 1.62,
@@ -160,6 +178,8 @@ let leftMousePressed = false;
 let rightMousePressed = false;
 let interactionCooldown = 0;
 let selectedBlock = GRASS;
+let lastTime = performance.now();
+ensureChunk(0, 0);
 
 window.addEventListener('keydown', (event) => {
   if (event.code === 'Space') {
@@ -213,13 +233,23 @@ window.addEventListener('mousemove', (event) => {
 });
 
 function getWorldBlock(x, y, z) {
-  if (x < 0 || x >= CHUNK_SIZE || z < 0 || z >= CHUNK_SIZE || y < 0 || y >= CHUNK_HEIGHT) return AIR;
-  return chunk.getBlock(Math.floor(x), Math.floor(y), Math.floor(z));
+  if (y < 0 || y >= CHUNK_HEIGHT) return AIR;
+  const chunkX = Math.floor(x / CHUNK_SIZE);
+  const chunkZ = Math.floor(z / CHUNK_SIZE);
+  const chunk = ensureChunk(chunkX, chunkZ);
+  const localX = ((Math.floor(x) % CHUNK_SIZE) + CHUNK_SIZE) % CHUNK_SIZE;
+  const localZ = ((Math.floor(z) % CHUNK_SIZE) + CHUNK_SIZE) % CHUNK_SIZE;
+  return chunk.getBlock(localX, Math.floor(y), localZ);
 }
 
 function setWorldBlock(x, y, z, blockType) {
-  if (x < 0 || x >= CHUNK_SIZE || z < 0 || z >= CHUNK_SIZE || y < 0 || y >= CHUNK_HEIGHT) return false;
-  chunk.setBlock(Math.floor(x), Math.floor(y), Math.floor(z), blockType);
+  if (y < 0 || y >= CHUNK_HEIGHT) return false;
+  const chunkX = Math.floor(x / CHUNK_SIZE);
+  const chunkZ = Math.floor(z / CHUNK_SIZE);
+  const chunk = ensureChunk(chunkX, chunkZ);
+  const localX = ((Math.floor(x) % CHUNK_SIZE) + CHUNK_SIZE) % CHUNK_SIZE;
+  const localZ = ((Math.floor(z) % CHUNK_SIZE) + CHUNK_SIZE) % CHUNK_SIZE;
+  chunk.setBlock(localX, Math.floor(y), localZ, blockType);
   return true;
 }
 
@@ -256,6 +286,10 @@ function castRay() {
   const dirY = -Math.sin(player.pitch);
   const dirZ = Math.sin(player.yaw) * Math.cos(player.pitch);
 
+  let prevBlockX = Math.floor(originX);
+  let prevBlockY = Math.floor(originY);
+  let prevBlockZ = Math.floor(originZ);
+
   for (let step = 0; step < 16; step += 1) {
     const px = originX + dirX * step * 0.18;
     const py = originY + dirY * step * 0.18;
@@ -265,15 +299,27 @@ function castRay() {
     const blockZ = Math.floor(pz);
     const block = getWorldBlock(blockX, blockY, blockZ);
     if (block && block !== AIR) {
-      return { x: blockX, y: blockY, z: blockZ, block };
+      let face = 'top';
+      if (blockX > prevBlockX) face = 'west';
+      else if (blockX < prevBlockX) face = 'east';
+      else if (blockY > prevBlockY) face = 'bottom';
+      else if (blockY < prevBlockY) face = 'top';
+      else if (blockZ > prevBlockZ) face = 'north';
+      else if (blockZ < prevBlockZ) face = 'south';
+
+      return { x: blockX, y: blockY, z: blockZ, block, face };
     }
+
+    prevBlockX = blockX;
+    prevBlockY = blockY;
+    prevBlockZ = blockZ;
   }
   return null;
 }
 
-function updatePlayer() {
+function updatePlayer(deltaTime) {
   if (interactionCooldown > 0) {
-    interactionCooldown -= 1 / 60;
+    interactionCooldown -= deltaTime;
   }
 
   if (mouseLocked && interactionCooldown <= 0) {
@@ -287,9 +333,18 @@ function updatePlayer() {
     if (rightMousePressed) {
       const hit = castRay();
       if (hit) {
-        const placeX = hit.x + Math.sign(Math.cos(player.yaw));
-        const placeY = hit.y;
-        const placeZ = hit.z + Math.sign(Math.sin(player.yaw));
+        const placeOffsets = {
+          west: { x: 1, y: 0, z: 0 },
+          east: { x: -1, y: 0, z: 0 },
+          bottom: { x: 0, y: 1, z: 0 },
+          top: { x: 0, y: -1, z: 0 },
+          north: { x: 0, y: 0, z: 1 },
+          south: { x: 0, y: 0, z: -1 },
+        };
+        const offset = placeOffsets[hit.face] || { x: 0, y: 0, z: 0 };
+        const placeX = hit.x + offset.x;
+        const placeY = hit.y + offset.y;
+        const placeZ = hit.z + offset.z;
         if (!isSolidBlock(placeX, placeY, placeZ) && !isSolidBlock(player.x, player.y + 0.7, player.z)) {
           setWorldBlock(placeX, placeY, placeZ, selectedBlock);
           interactionCooldown = 0.08;
@@ -298,7 +353,7 @@ function updatePlayer() {
     }
   }
 
-  const moveSpeed = keys.has('shift') ? 0.08 : 0.055;
+  const moveSpeed = (keys.has('shift') ? 0.08 : 0.055) * (deltaTime * 60);
   let moveX = 0;
   let moveZ = 0;
 
@@ -345,7 +400,7 @@ function updatePlayer() {
   }
   jumpRequested = false;
 
-  player.verticalVelocity -= 0.024;
+  player.verticalVelocity -= 0.024 * (deltaTime * 60);
   const nextY = player.y + player.verticalVelocity;
   if (!checkCollision(player.x, nextY, player.z)) {
     player.y = nextY;
@@ -490,6 +545,22 @@ function renderFace(face) {
   face.depth = depth;
 }
 
+function renderSelectionOutline(hit) {
+  if (!hit) return;
+  const projected = getFaceVertices(hit.x, hit.y, hit.z, hit.face)
+    .map((vertex) => projectPoint(vertex.x, vertex.y, vertex.z))
+    .filter(Boolean);
+  if (projected.length < 3) return;
+
+  ctx.beginPath();
+  ctx.moveTo(projected[0].x, projected[0].y);
+  projected.slice(1).forEach((point) => ctx.lineTo(point.x, point.y));
+  ctx.closePath();
+  ctx.strokeStyle = 'rgba(255,255,255,0.95)';
+  ctx.lineWidth = 2.2;
+  ctx.stroke();
+}
+
 function renderScene() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -526,34 +597,43 @@ function renderScene() {
   }
 
   const faces = [];
-  for (let x = 0; x < CHUNK_SIZE; x += 1) {
-    for (let z = 0; z < CHUNK_SIZE; z += 1) {
-      for (let y = 0; y < CHUNK_HEIGHT; y += 1) {
-        const blockType = getWorldBlock(x, y, z);
-        if (blockType === AIR) continue;
+  const playerChunkX = Math.floor(player.x / CHUNK_SIZE);
+  const playerChunkZ = Math.floor(player.z / CHUNK_SIZE);
+  for (let chunkX = playerChunkX - RENDER_DISTANCE; chunkX <= playerChunkX + RENDER_DISTANCE; chunkX += 1) {
+    for (let chunkZ = playerChunkZ - RENDER_DISTANCE; chunkZ <= playerChunkZ + RENDER_DISTANCE; chunkZ += 1) {
+      const chunk = ensureChunk(chunkX, chunkZ);
+      for (let localX = 0; localX < chunk.size; localX += 1) {
+        for (let localZ = 0; localZ < chunk.size; localZ += 1) {
+          for (let localY = 0; localY < chunk.height; localY += 1) {
+            const blockType = chunk.getBlock(localX, localY, localZ);
+            if (blockType === AIR) continue;
+            const worldX = chunkX * chunk.size + localX;
+            const worldZ = chunkZ * chunk.size + localZ;
 
-        const directions = [
-          { name: 'north', dx: 0, dy: 0, dz: -1 },
-          { name: 'south', dx: 0, dy: 0, dz: 1 },
-          { name: 'east', dx: 1, dy: 0, dz: 0 },
-          { name: 'west', dx: -1, dy: 0, dz: 0 },
-          { name: 'top', dx: 0, dy: 1, dz: 0 },
-          { name: 'bottom', dx: 0, dy: -1, dz: 0 },
-        ];
+            const directions = [
+              { name: 'north', dx: 0, dy: 0, dz: -1 },
+              { name: 'south', dx: 0, dy: 0, dz: 1 },
+              { name: 'east', dx: 1, dy: 0, dz: 0 },
+              { name: 'west', dx: -1, dy: 0, dz: 0 },
+              { name: 'top', dx: 0, dy: 1, dz: 0 },
+              { name: 'bottom', dx: 0, dy: -1, dz: 0 },
+            ];
 
-        directions.forEach((direction) => {
-          const neighbor = getWorldBlock(x + direction.dx, y + direction.dy, z + direction.dz);
-          const shouldRenderFace = blockType === WATER
-            ? !isOpaqueBlock(x + direction.dx, y + direction.dy, z + direction.dz)
-            : !isOpaqueBlock(x + direction.dx, y + direction.dy, z + direction.dz);
-          if (shouldRenderFace) {
-            faces.push({
-              blockType,
-              direction: direction.name,
-              vertices: getFaceVertices(x, y, z, direction.name),
+            directions.forEach((direction) => {
+              const neighborX = worldX + direction.dx;
+              const neighborY = localY + direction.dy;
+              const neighborZ = worldZ + direction.dz;
+              const shouldRenderFace = !isOpaqueBlock(neighborX, neighborY, neighborZ);
+              if (shouldRenderFace) {
+                faces.push({
+                  blockType,
+                  direction: direction.name,
+                  vertices: getFaceVertices(worldX, localY, worldZ, direction.name),
+                });
+              }
             });
           }
-        });
+        }
       }
     }
   }
@@ -563,13 +643,17 @@ function renderScene() {
     renderFace(face);
   });
 
+  const selectionHit = mouseLocked ? castRay() : null;
+  renderSelectionOutline(selectionHit);
+
   ctx.fillStyle = 'rgba(255,255,255,0.84)';
   ctx.font = '18px Inter, sans-serif';
   ctx.fillText('Voxel World', 20, 32);
   ctx.font = '14px Inter, sans-serif';
   ctx.fillText(`Position: ${player.x.toFixed(1)}, ${player.z.toFixed(1)}`, 20, 56);
-  ctx.fillText(`Block: ${selectedBlock.toUpperCase()} · 1-7 switch`, 20, 78);
-  ctx.fillText('Click to lock mouse · WASD move · Space jump · Left/Right click to edit blocks', 20, 100);
+  ctx.fillText(`Chunk: ${Math.floor(player.x / CHUNK_SIZE)}, ${Math.floor(player.z / CHUNK_SIZE)}`, 20, 78);
+  ctx.fillText(`Block: ${selectedBlock.toUpperCase()} · 1-7 switch`, 20, 100);
+  ctx.fillText('Click to lock mouse · WASD move · Space jump · Left/Right click to edit blocks', 20, 122);
 
   ctx.strokeStyle = 'rgba(255,255,255,0.9)';
   ctx.lineWidth = 1.2;
@@ -581,10 +665,12 @@ function renderScene() {
   ctx.stroke();
 }
 
-function loop() {
-  updatePlayer();
+function loop(now) {
+  const deltaTime = Math.min(0.032, (now - lastTime) / 1000 || 0.016);
+  lastTime = now;
+  updatePlayer(deltaTime);
   renderScene();
   requestAnimationFrame(loop);
 }
 
-loop();
+requestAnimationFrame(loop);
