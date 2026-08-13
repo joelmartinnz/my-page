@@ -9,11 +9,11 @@ const speedText = document.getElementById('speedText');
 
 const WORLD_WIDTH = canvas.width;
 const WORLD_HEIGHT = canvas.height;
-const PLAYER_X = 120;
-const BASE_SPEED = 5.2;
-const GRAVITY = 0.54;
-const JUMP_FORCE = -11.2;
-const FLOOR_Y = WORLD_HEIGHT - 52;
+const BASE_SPEED = 350;
+const PLAYER_LANE_MIN = -1.5;
+const PLAYER_LANE_MAX = 1.5;
+const TUNNEL_DEPTH = 1000;
+const PLAYER_Y = WORLD_HEIGHT - 110;
 
 let gameState = 'ready';
 let score = 0;
@@ -24,24 +24,27 @@ let spawnTimer = 0;
 let stars = [];
 
 const player = {
-  x: PLAYER_X,
-  y: FLOOR_Y - 28,
-  w: 28,
-  h: 28,
-  vy: 0,
-  grounded: true,
+  lane: 0,
+  targetLane: 0,
+  bob: 0,
+  x: WORLD_WIDTH * 0.5,
+  y: PLAYER_Y,
 };
 
 let obstacles = [];
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
 
 function makeStars() {
   stars = [];
   for (let i = 0; i < 90; i += 1) {
     stars.push({
       x: Math.random() * WORLD_WIDTH,
-      y: Math.random() * (WORLD_HEIGHT * 0.72),
+      y: Math.random() * (WORLD_HEIGHT * 0.7),
       r: 1 + Math.random() * 2,
-      a: 0.35 + Math.random() * 0.8,
+      a: 0.4 + Math.random() * 0.6,
     });
   }
 }
@@ -51,10 +54,11 @@ function resetBest() {
 }
 
 function resetGame() {
-  player.x = PLAYER_X;
-  player.y = FLOOR_Y - player.h;
-  player.vy = 0;
-  player.grounded = true;
+  player.lane = 0;
+  player.targetLane = 0;
+  player.bob = 0;
+  player.x = WORLD_WIDTH * 0.5;
+  player.y = PLAYER_Y;
 
   obstacles = [];
   score = 0;
@@ -81,76 +85,57 @@ function endGame() {
   bestText.textContent = String(bestScore);
 }
 
-function jump() {
+function moveLane(direction) {
   if (gameState === 'ready') startGame();
   if (gameState !== 'running') return;
-  if (player.grounded) {
-    player.vy = JUMP_FORCE;
-    player.grounded = false;
-  }
+  player.targetLane = clamp(player.targetLane + direction, PLAYER_LANE_MIN, PLAYER_LANE_MAX);
 }
 
-function createObstacle() {
-  const gapWidth = 70 + Math.random() * 110;
+function spawnObstacle() {
+  const gapCenter = (Math.random() * 2 - 1) * 190;
+  const gapWidth = 110 + Math.random() * 110;
   obstacles.push({
-    x: WORLD_WIDTH + 40,
+    z: TUNNEL_DEPTH,
+    gapCenter,
     gapWidth,
     passed: false,
   });
 }
 
-function isPlayerOverGap(obstacle) {
-  const gapLeft = obstacle.x;
-  const gapRight = obstacle.x + obstacle.gapWidth;
-  const playerLeft = player.x;
-  const playerRight = player.x + player.w;
-  return playerRight > gapLeft && playerLeft < gapRight && player.y + player.h >= FLOOR_Y;
-}
-
 function update(delta) {
   if (gameState !== 'running') return;
 
-  speedMultiplier = 1 + score * 0.05;
+  speedMultiplier = 1 + score * 0.08;
   speedText.textContent = `${speedMultiplier.toFixed(1)}x`;
 
+  player.lane += (player.targetLane - player.lane) * Math.min(1, delta * 12);
+  player.bob += delta * 10;
+  player.x = WORLD_WIDTH * 0.5 + player.lane * 120;
+
   spawnTimer += delta;
-  const spawnInterval = Math.max(0.9, 1.5 - score * 0.02);
+  const spawnInterval = Math.max(0.72, 1.15 - score * 0.015);
   if (spawnTimer > spawnInterval / speedMultiplier) {
-    createObstacle();
+    spawnObstacle();
     spawnTimer = 0;
   }
 
-  player.vy += GRAVITY * 60 * delta;
-  player.y += player.vy * delta * 60;
-
-  if (player.y + player.h >= FLOOR_Y) {
-    const isOnSolidGround = !obstacles.some((obstacle) => isPlayerOverGap(obstacle));
-    if (isOnSolidGround) {
-      player.y = FLOOR_Y - player.h;
-      player.vy = 0;
-      player.grounded = true;
-    } else {
-      player.grounded = false;
-    }
-  } else {
-    player.grounded = false;
-  }
-
   for (const obstacle of obstacles) {
-    obstacle.x -= BASE_SPEED * speedMultiplier * delta * 60;
+    obstacle.z -= BASE_SPEED * speedMultiplier * delta;
 
-    if (!obstacle.passed && obstacle.x + obstacle.gapWidth < player.x) {
+    const nearHit = obstacle.z < 120 && obstacle.z > 40;
+    const laneDelta = Math.abs(player.lane - obstacle.gapCenter / 190);
+    if (nearHit && laneDelta > obstacle.gapWidth / 260) {
+      endGame();
+      return;
+    }
+
+    if (!obstacle.passed && obstacle.z < 30) {
       obstacle.passed = true;
       score += 1;
       scoreText.textContent = String(score);
     }
 
-    if (isPlayerOverGap(obstacle)) {
-      endGame();
-      return;
-    }
-
-    if (obstacle.x + obstacle.gapWidth < -60) {
+    if (obstacle.z < -120) {
       obstacles = obstacles.filter((item) => item !== obstacle);
     }
   }
@@ -158,9 +143,9 @@ function update(delta) {
 
 function drawBackground() {
   const sky = ctx.createLinearGradient(0, 0, 0, WORLD_HEIGHT);
-  sky.addColorStop(0, '#4f83ea');
-  sky.addColorStop(0.48, '#3f6fd4');
-  sky.addColorStop(1, '#0d1934');
+  sky.addColorStop(0, '#2f62d6');
+  sky.addColorStop(0.42, '#1d4c9d');
+  sky.addColorStop(1, '#091a2f');
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
@@ -170,75 +155,98 @@ function drawBackground() {
     ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
     ctx.fill();
   }
+}
 
-  const tunnelGlow = ctx.createRadialGradient(WORLD_WIDTH * 0.5, WORLD_HEIGHT * 0.6, 40, WORLD_WIDTH * 0.5, WORLD_HEIGHT * 0.6, 340);
-  tunnelGlow.addColorStop(0, 'rgba(160, 202, 255, 0.18)');
-  tunnelGlow.addColorStop(1, 'rgba(160, 202, 255, 0)');
-  ctx.fillStyle = tunnelGlow;
-  ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+function drawTunnel() {
+  const horizonY = 150;
+  const floorY = WORLD_HEIGHT - 60;
 
-  ctx.fillStyle = '#091b2f';
-  ctx.fillRect(0, FLOOR_Y, WORLD_WIDTH, WORLD_HEIGHT - FLOOR_Y);
+  for (let i = 0; i < 24; i += 1) {
+    const d1 = i / 24;
+    const d2 = (i + 1) / 24;
+    const p1 = 1 - d1;
+    const p2 = 1 - d2;
 
-  for (let i = 0; i < WORLD_WIDTH; i += 38) {
-    ctx.fillStyle = i % 2 === 0 ? 'rgba(130,200,255,0.12)' : 'rgba(255,255,255,0.08)';
-    ctx.fillRect(i, FLOOR_Y + 10, 18, 14);
+    const width1 = 70 + p1 * 710;
+    const width2 = 70 + p2 * 710;
+    const y1 = horizonY + (1 - p1) * 230;
+    const y2 = horizonY + (1 - p2) * 230;
+
+    ctx.fillStyle = i % 2 === 0 ? 'rgba(11, 25, 45, 0.94)' : 'rgba(17, 34, 58, 0.96)';
+    ctx.beginPath();
+    ctx.moveTo(WORLD_WIDTH * 0.5 - width1 * 0.5, y1);
+    ctx.lineTo(WORLD_WIDTH * 0.5 + width1 * 0.5, y1);
+    ctx.lineTo(WORLD_WIDTH * 0.5 + width2 * 0.5, y2);
+    ctx.lineTo(WORLD_WIDTH * 0.5 - width2 * 0.5, y2);
+    ctx.closePath();
+    ctx.fill();
   }
+
+  ctx.fillStyle = '#091629';
+  ctx.fillRect(0, floorY, WORLD_WIDTH, WORLD_HEIGHT - floorY);
 }
 
 function drawObstacle(obstacle) {
-  ctx.fillStyle = '#061521';
-  ctx.fillRect(obstacle.x, FLOOR_Y, obstacle.gapWidth, WORLD_HEIGHT - FLOOR_Y);
+  const depthRatio = clamp((TUNNEL_DEPTH - obstacle.z) / TUNNEL_DEPTH, 0, 1);
+  const baseY = 160 + depthRatio * 200;
+  const width = 70 + depthRatio * 520;
+  const gapHalf = obstacle.gapWidth * 0.5 * (0.25 + depthRatio * 0.85);
 
-  ctx.fillStyle = '#193b6e';
-  ctx.fillRect(0, FLOOR_Y, obstacle.x, WORLD_HEIGHT - FLOOR_Y);
-  ctx.fillRect(obstacle.x + obstacle.gapWidth, FLOOR_Y, WORLD_WIDTH - (obstacle.x + obstacle.gapWidth), WORLD_HEIGHT - FLOOR_Y);
+  const x = WORLD_WIDTH * 0.5 + obstacle.gapCenter * (0.12 + depthRatio * 0.8);
+  const gapLeft = x - gapHalf;
+  const gapRight = x + gapHalf;
 
-  ctx.fillStyle = '#132d52';
-  ctx.fillRect(obstacle.x, FLOOR_Y + 4, obstacle.gapWidth, 8);
+  ctx.fillStyle = '#0a1427';
+  ctx.fillRect(0, baseY, gapLeft, 50 + depthRatio * 140);
+  ctx.fillRect(gapRight, baseY, WORLD_WIDTH - gapRight, 50 + depthRatio * 140);
+
+  ctx.fillStyle = '#0f1d32';
+  ctx.fillRect(gapLeft, baseY - 8, gapHalf * 2, 12);
 }
 
 function drawPlayer() {
+  const bobOffset = Math.sin(player.bob) * 3;
   const x = player.x;
-  const y = player.y;
+  const y = PLAYER_Y + bobOffset;
 
   ctx.save();
   ctx.translate(x, y);
 
-  ctx.fillStyle = '#d3d8df';
+  ctx.fillStyle = '#d9dfe8';
   ctx.beginPath();
-  ctx.ellipse(14, 12, 11, 10, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, 0, 16, 12, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.fillStyle = '#ecf5ff';
+  ctx.fillStyle = '#f3f9ff';
   ctx.beginPath();
-  ctx.arc(10, 12, 2.2, 0, Math.PI * 2);
-  ctx.arc(18, 12, 2.2, 0, Math.PI * 2);
+  ctx.arc(-6, -4, 2.5, 0, Math.PI * 2);
+  ctx.arc(6, -4, 2.5, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.fillStyle = '#0e1325';
+  ctx.fillStyle = '#101826';
   ctx.beginPath();
-  ctx.arc(10, 12, 1.1, 0, Math.PI * 2);
-  ctx.arc(18, 12, 1.1, 0, Math.PI * 2);
+  ctx.arc(-6, -4, 1.2, 0, Math.PI * 2);
+  ctx.arc(6, -4, 1.2, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.strokeStyle = '#7d9cc8';
+  ctx.fillStyle = '#8fe5ff';
+  ctx.fillRect(-12, 10, 24, 9);
+
+  ctx.strokeStyle = '#7eaad8';
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(7, 18);
-  ctx.lineTo(2, 24);
-  ctx.moveTo(21, 18);
-  ctx.lineTo(26, 24);
+  ctx.moveTo(-8, 10);
+  ctx.lineTo(-14, 22);
+  ctx.moveTo(8, 10);
+  ctx.lineTo(14, 22);
   ctx.stroke();
-
-  ctx.fillStyle = '#8ee4ff';
-  ctx.fillRect(6, 20, 18, 8);
 
   ctx.restore();
 }
 
 function draw() {
   drawBackground();
+  drawTunnel();
 
   for (const obstacle of obstacles) {
     drawObstacle(obstacle);
@@ -247,14 +255,14 @@ function draw() {
   drawPlayer();
 
   if (gameState === 'ready') {
-    ctx.fillStyle = 'rgba(5, 12, 22, 0.32)';
+    ctx.fillStyle = 'rgba(5, 12, 22, 0.34)';
     ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     ctx.fillStyle = '#ebf9ff';
     ctx.textAlign = 'center';
     ctx.font = '900 48px sans-serif';
-    ctx.fillText('Level 2', WORLD_WIDTH / 2, WORLD_HEIGHT / 2 - 8);
+    ctx.fillText('Level 2', WORLD_WIDTH * 0.5, WORLD_HEIGHT * 0.48);
     ctx.font = '600 18px sans-serif';
-    ctx.fillText('Press space to leap', WORLD_WIDTH / 2, WORLD_HEIGHT / 2 + 26);
+    ctx.fillText('Move left and right to dodge the gaps', WORLD_WIDTH * 0.5, WORLD_HEIGHT * 0.55);
   }
 
   if (gameState === 'gameover') {
@@ -263,10 +271,10 @@ function draw() {
     ctx.fillStyle = '#f3bb57';
     ctx.textAlign = 'center';
     ctx.font = '900 38px sans-serif';
-    ctx.fillText('Crash!', WORLD_WIDTH / 2, WORLD_HEIGHT / 2 - 8);
+    ctx.fillText('Crash!', WORLD_WIDTH * 0.5, WORLD_HEIGHT * 0.48);
     ctx.fillStyle = '#ecf8ff';
     ctx.font = '600 20px sans-serif';
-    ctx.fillText(`Final score: ${score}`, WORLD_WIDTH / 2, WORLD_HEIGHT / 2 + 24);
+    ctx.fillText(`Final score: ${score}`, WORLD_WIDTH * 0.5, WORLD_HEIGHT * 0.56);
   }
 }
 
@@ -280,13 +288,30 @@ function loop(timestamp) {
 }
 
 window.addEventListener('keydown', (event) => {
-  if (event.code === 'Space' || event.code === 'ArrowUp' || event.code === 'KeyW') {
+  if (event.code === 'ArrowLeft' || event.code === 'KeyA') {
     event.preventDefault();
-    jump();
+    moveLane(-1);
+  }
+
+  if (event.code === 'ArrowRight' || event.code === 'KeyD') {
+    event.preventDefault();
+    moveLane(1);
+  }
+
+  if (event.code === 'Space') {
+    event.preventDefault();
+    if (gameState === 'ready') startGame();
   }
 });
 
-canvas.addEventListener('pointerdown', jump);
+canvas.addEventListener('pointerdown', () => startGame());
+canvas.addEventListener('pointermove', (event) => {
+  if (gameState !== 'running') return;
+  const rect = canvas.getBoundingClientRect();
+  const x = (event.clientX - rect.left) / rect.width;
+  player.targetLane = clamp((x - 0.5) * 4.2, PLAYER_LANE_MIN, PLAYER_LANE_MAX);
+});
+
 startBtn.addEventListener('click', startGame);
 resetBtn.addEventListener('click', resetGame);
 
